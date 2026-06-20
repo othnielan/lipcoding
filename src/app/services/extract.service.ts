@@ -69,6 +69,7 @@ export class ExtractService {
       // Non-schedule small talk is kept as a note so nothing said is lost.
       if (result.intent === 'chat') {
         this.notes.add(text, 'auto');
+        this.store.appendSystem('일정이 아니라서 노트에 저장했네.');
       }
 
       // 3) Finally the NPC narration.

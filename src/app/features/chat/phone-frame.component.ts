@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { ChatPanelComponent } from './chat-panel.component';
 import { SocialNotificationsComponent } from '../social/social-notifications.component';
 import { SubscriptionStore } from '../../state/subscription.store';
+import { NotesStore } from '../../state/notes.store';
 import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
 
@@ -36,6 +37,15 @@ import { CLOCK } from '../../ports/clock.port';
       </div>
       <div class="screen">
         <app-chat-panel />
+        @if (toast(); as t) {
+          <div class="toast">
+            <span class="t-ic"><app-icon name="note" [size]="16" /></span>
+            <div class="t-body">
+              <span class="t-ttl">노트에 저장됨</span>
+              <span class="t-tx">{{ t.text }}</span>
+            </div>
+          </div>
+        }
         @if (open()) {
           <div class="sheet">
             <div class="sheet-head">
@@ -233,19 +243,79 @@ import { CLOCK } from '../../ports/clock.port';
         border-radius: 3px;
         background: #20242c;
       }
+      .toast {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        z-index: 7;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: #1f2430;
+        color: #fff;
+        border-radius: 12px;
+        padding: 9px 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+        animation: toastIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .toast .t-ic {
+        flex: 0 0 auto;
+        display: inline-flex;
+        color: #fbbf24;
+      }
+      .toast .t-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 1px;
+      }
+      .toast .t-ttl {
+        font-size: 11px;
+        font-weight: 800;
+        color: #fcd9a3;
+      }
+      .toast .t-tx {
+        font-size: 12.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateY(-12px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
     `,
   ],
 })
 export class PhoneFrameComponent {
   private readonly clock = inject(CLOCK);
   readonly sub = inject(SubscriptionStore);
+  readonly notes = inject(NotesStore);
   readonly clockText = signal(this.fmt());
   readonly open = signal(false);
+  readonly toast = signal<{ text: string } | null>(null);
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
       setInterval(() => this.clockText.set(this.fmt()), 10000);
     }
+    // Surface a transient toast whenever a note is added.
+    effect(() => {
+      const n = this.notes.lastAdded();
+      if (!n) return;
+      if (typeof window === 'undefined') return;
+      this.toast.set({ text: n.text });
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => this.toast.set(null), 3000);
+    });
   }
 
   toggle(): void {

@@ -195,21 +195,21 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
   styles: [
     `
       .bar {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 6px;
-        overflow-x: auto;
-        padding-bottom: 2px;
         margin-top: 9px;
       }
       .chip {
-        flex: 0 0 auto;
+        position: relative;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        justify-content: center;
+        gap: 5px;
         background: #fff;
         border: 1px solid #dfe3ea;
-        border-radius: 999px;
-        padding: 5px 10px;
+        border-radius: 11px;
+        padding: 9px 6px;
         font-size: 12px;
         font-weight: 700;
         color: #3a4252;
@@ -222,16 +222,23 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
       }
       .chip .ic {
         font-size: 13px;
+        display: inline-flex;
       }
       .chip .cnt {
+        position: absolute;
+        top: -5px;
+        right: -5px;
         background: #ef4444;
         color: #fff;
         font-size: 9px;
         font-weight: 800;
         border-radius: 999px;
-        padding: 0 5px;
-        min-width: 15px;
-        text-align: center;
+        padding: 0 4px;
+        min-width: 16px;
+        height: 16px;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 0 2px #eef0f4;
       }
       .sheet {
         position: absolute;

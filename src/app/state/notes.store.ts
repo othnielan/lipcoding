@@ -21,6 +21,9 @@ export class NotesStore {
   );
   readonly count = computed(() => this._notes().length);
 
+  /** The most recently added note — used to surface a transient toast. */
+  readonly lastAdded = signal<Note | null>(null);
+
   constructor() {
     this.restore();
     effect(() => {
@@ -42,6 +45,7 @@ export class NotesStore {
       source,
     };
     this._notes.update((list) => [...list, note]);
+    this.lastAdded.set(note);
     return note;
   }
 
