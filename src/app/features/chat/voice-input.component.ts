@@ -23,18 +23,29 @@ import { IconComponent } from '../../shared/icon.component';
         [placeholder]="placeholder()"
         [disabled]="extract.busy()"
       />
-      <button class="send" [class.busy]="extract.busy()" (click)="send()" [disabled]="extract.busy() || !draft().trim()">
+      <button class="send" [class.busy]="extract.busy()" (click)="send()" [disabled]="extract.busy() || !draft().trim()" aria-label="전송" [attr.aria-busy]="extract.busy()">
         @if (extract.busy()) {
           <app-icon name="loader" [size]="16" class="spin" />
         } @else {
           <app-icon name="send" [size]="16" />
         }
       </button>
+      @if (extract.busy()) {
+        <button class="cancel" (click)="extract.cancel()" aria-label="처리 취소" title="취소">
+          <app-icon name="close" [size]="16" />
+        </button>
+      } @else if (extract.lastUtterance()) {
+        <button class="retry" (click)="extract.retryLast()" aria-label="마지막 발화 다시 시도" title="다시 시도">
+          <app-icon name="reset" [size]="16" />
+        </button>
+      }
       <button
         class="mic"
         [class.live]="listening()"
         [disabled]="!speech.supported"
         (click)="toggle()"
+        [attr.aria-label]="listening() ? '음성 입력 종료' : (speech.supported ? '음성으로 입력' : '음성인식 미지원')"
+        [attr.aria-pressed]="listening()"
         [title]="speech.supported ? '눌러서 말하기 / 다시 누르면 종료' : '이 브라우저는 음성인식 미지원'"
       >
         <app-icon name="mic" [size]="18" />
@@ -85,6 +96,14 @@ import { IconComponent } from '../../shared/icon.component';
       }
       .send.busy:disabled {
         opacity: 1;
+      }
+      .cancel {
+        background: #ef4444;
+        color: #fff;
+      }
+      .retry {
+        background: #e5e7eb;
+        color: #374151;
       }
       .spin {
         animation: spin 0.8s linear infinite;

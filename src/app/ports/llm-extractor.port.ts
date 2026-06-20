@@ -10,7 +10,7 @@ export interface ExtractInput {
 export interface LlmExtractorPort {
   /** The prompt/system text used, exposed for the admin "prompt" panel. */
   describe(input: ExtractInput): { system: string; user: string };
-  extract(input: ExtractInput): Promise<ExtractResult>;
+  extract(input: ExtractInput, opts?: { signal?: AbortSignal }): Promise<ExtractResult>;
   /** Where the most recent extract() result actually came from. */
   readonly lastSource?: () => 'copilot' | 'heuristic';
   /** Raw request/response exchange from the most recent extract(), for the SDK console. */

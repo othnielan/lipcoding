@@ -1,6 +1,4 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
 import { ExtractInput, LlmExtractorPort } from '../ports/llm-extractor.port';
 import { ExtractResult, SdkExchange } from '../domain/types';
 import { HeuristicExtractor } from './heuristic-extractor.adapter';
@@ -13,7 +11,6 @@ import { HeuristicExtractor } from './heuristic-extractor.adapter';
  */
 @Injectable({ providedIn: 'root' })
 export class CopilotExtractor implements LlmExtractorPort {
-  private readonly http = inject(HttpClient);
   private readonly fallback = inject(HeuristicExtractor);
   private readonly _source = signal<'copilot' | 'heuristic'>('heuristic');
   private readonly _sdk = signal<SdkExchange | null>(null);
@@ -30,20 +27,24 @@ export class CopilotExtractor implements LlmExtractorPort {
     };
   }
 
-  async extract(input: ExtractInput): Promise<ExtractResult> {
+  async extract(input: ExtractInput, opts?: { signal?: AbortSignal }): Promise<ExtractResult> {
     try {
-      const res = await firstValueFrom(
-        this.http.post<ExtractResult & { _sdk?: SdkExchange }>('/api/extract', input, {
-          observe: 'response',
-        }),
-      );
+      const res = await fetch('/api/extract', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(input),
+        signal: opts?.signal,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const header = res.headers.get('X-Extract-Source');
       this._source.set(header === 'copilot' ? 'copilot' : 'heuristic');
-      const body = (res.body ?? {}) as ExtractResult & { _sdk?: SdkExchange };
+      const body = (await res.json()) as ExtractResult & { _sdk?: SdkExchange };
       this._sdk.set(body._sdk ?? null);
       const { _sdk, ...result } = body;
       return result as ExtractResult;
-    } catch {
+    } catch (err) {
+      // A user-initiated cancel must not silently fall back to the heuristic.
+      if ((err as Error)?.name === 'AbortError') throw err;
       this._source.set('heuristic');
       this._sdk.set({
         source: 'heuristic',

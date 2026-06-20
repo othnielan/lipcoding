@@ -20,7 +20,7 @@ export class HeuristicExtractor implements LlmExtractorPort {
     };
   }
 
-  async extract(input: ExtractInput): Promise<ExtractResult> {
+  async extract(input: ExtractInput, _opts?: { signal?: AbortSignal }): Promise<ExtractResult> {
     return parseUtterance(input.utterance, input.nowISO);
   }
 }

@@ -25,13 +25,13 @@ import { IconComponent } from '../../shared/icon.component';
         <div class="npc"><app-icon name="wizard" [size]="13" /> {{ l.result.npcReply }}</div>
 
         <div class="accordions">
-          <button class="acc" (click)="toggle('json')">
+          <button class="acc" (click)="toggle('json')" [attr.aria-expanded]="open() === 'json'">
             {{ open() === 'json' ? '▾' : '▸' }} raw JSON ({{ l.result.tasks.length }} tasks)
           </button>
           @if (open() === 'json') {
             <pre class="mono code">{{ json() }}</pre>
           }
-          <button class="acc" (click)="toggle('prompt')">
+          <button class="acc" (click)="toggle('prompt')" [attr.aria-expanded]="open() === 'prompt'">
             {{ open() === 'prompt' ? '▾' : '▸' }} prompt
           </button>
           @if (open() === 'prompt') {

@@ -19,11 +19,16 @@ export class ExtractService {
   private readonly persona = inject(PersonaStore);
 
   readonly busy = signal(false);
+  /** Last submitted utterance, exposed so the UI can offer a one-click retry. */
+  readonly lastUtterance = signal('');
+  private controller: AbortController | null = null;
 
   async submit(utterance: string): Promise<void> {
     const text = utterance.trim();
     if (!text || this.busy()) return;
 
+    this.lastUtterance.set(text);
+    this.controller = new AbortController();
     this.busy.set(true);
     this.store.appendUser(text);
 
@@ -32,7 +37,7 @@ export class ExtractService {
     const started = performance.now();
 
     try {
-      const result = await this.llm.extract(input);
+      const result = await this.llm.extract(input, { signal: this.controller.signal });
       const elapsed = Math.round(performance.now() - started);
       const source = this.llm.lastSource?.() ?? (prompt.system.startsWith('[Copilot') ? 'copilot' : 'heuristic');
       const sdk = this.llm.lastSdk?.() ?? null;
@@ -104,8 +109,12 @@ export class ExtractService {
         source,
         sdk,
       });
-    } catch {
-      this.store.appendNpc(personaSpeak(this.persona.selected(), { kind: 'error' }));
+    } catch (e) {
+      if ((e as Error)?.name === 'AbortError') {
+        this.store.appendSystem('요청을 취소했어요.');
+      } else {
+        this.store.appendNpc(personaSpeak(this.persona.selected(), { kind: 'error' }));
+      }
     } finally {
       // Keep the progress indicator on screen long enough to be felt, even when
       // the local heuristic parser returns almost instantly.
@@ -114,7 +123,19 @@ export class ExtractService {
       if (shown < MIN_BUSY_MS) {
         await new Promise((r) => setTimeout(r, MIN_BUSY_MS - shown));
       }
+      this.controller = null;
       this.busy.set(false);
     }
+  }
+
+  /** Aborts the in-flight extraction (user-initiated cancel). */
+  cancel(): void {
+    this.controller?.abort();
+  }
+
+  /** Re-runs the most recent utterance, if any and not already busy. */
+  retryLast(): void {
+    const last = this.lastUtterance();
+    if (last && !this.busy()) void this.submit(last);
   }
 }
