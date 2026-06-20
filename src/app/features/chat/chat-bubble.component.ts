@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { CATEGORY_EMOJI, ChatMessage, TaskDraft } from '../../domain/types';
+import { ChatMessage, TaskDraft } from '../../domain/types';
+import { IconComponent } from '../../shared/icon.component';
 
 const INTENT_LABEL: Record<string, string> = {
   add_schedule: '일정 추가',
@@ -14,10 +15,11 @@ const INTENT_LABEL: Record<string, string> = {
 @Component({
   selector: 'app-chat-bubble',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     @if (msg().role === 'extract' && card()) {
       <div class="row extract-row">
-        <div class="avatar ai" [class.glow]="card()!.source === 'copilot'">🤖</div>
+        <div class="avatar ai" [class.glow]="card()!.source === 'copilot'"><app-icon name="bot" [size]="18" /></div>
         <div class="card" [class.copilot-card]="card()!.source === 'copilot'">
           <span class="scan"></span>
           <div class="card-head">
@@ -29,11 +31,11 @@ const INTENT_LABEL: Record<string, string> = {
             <span class="ms"><span class="pulse"></span>{{ card()!.elapsedMs }}ms</span>
           </div>
           @if (card()!.tasks.length) {
-            <div class="count">⚡ {{ card()!.tasks.length }}개의 일정을 추출했어요</div>
+            <div class="count"><app-icon name="zap" [size]="13" /> {{ card()!.tasks.length }}개의 일정을 추출했어요</div>
             <ul class="tasks">
               @for (t of card()!.tasks; track $index) {
                 <li [style.animation-delay.ms]="$index * 90">
-                  <span class="emoji">{{ emoji(t) }}</span>
+                  <span class="emoji"><app-icon [name]="t.category" [size]="15" /></span>
                   <div class="t-body">
                     <div class="t-line">
                       <span class="t-title">{{ t.title }}</span>
@@ -42,6 +44,9 @@ const INTENT_LABEL: Record<string, string> = {
                     <div class="t-meta">
                       <span class="cat">{{ t.category }}</span>
                       <span class="meta">{{ meta(t) }}</span>
+                      @if (t.location) {
+                        <span class="meta loc"><app-icon name="location" [size]="12" /> {{ t.location }}</span>
+                      }
                       @if (deps(t)) {
                         <span class="dep">↳ {{ deps(t) }}</span>
                       }
@@ -52,11 +57,11 @@ const INTENT_LABEL: Record<string, string> = {
             </ul>
           } @else {
             <div class="empty">
-              {{
-                card()!.intent === 'chat' || card()!.intent === 'query'
-                  ? '💬 일정 외 응답 · 아래 답변 참고'
-                  : '추출된 일정 없음 · 의도만 분류됨'
-              }}
+              @if (card()!.intent === 'chat' || card()!.intent === 'query') {
+                <app-icon name="chat" [size]="13" /> 일정 외 응답 · 아래 답변 참고
+              } @else {
+                추출된 일정 없음 · 의도만 분류됨
+              }
             </div>
           }
           <span class="time">{{ time() }}</span>
@@ -65,7 +70,7 @@ const INTENT_LABEL: Record<string, string> = {
     } @else {
       <div class="row" [class.user]="msg().role === 'user'" [class.system]="msg().role === 'system'">
         @if (msg().role === 'npc') {
-          <div class="avatar">🧙</div>
+          <div class="avatar"><app-icon name="wizard" [size]="18" /></div>
         }
         <div class="bubble">
           <p>{{ msg().text }}</p>
@@ -341,6 +346,9 @@ const INTENT_LABEL: Record<string, string> = {
         font-weight: 700;
         color: #a5b4fc;
         margin-bottom: 7px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
       .tasks {
         list-style: none;
@@ -375,6 +383,9 @@ const INTENT_LABEL: Record<string, string> = {
       .emoji {
         flex: 0 0 auto;
         font-size: 17px;
+        display: inline-flex;
+        align-items: center;
+        color: #c7b9ff;
         filter: drop-shadow(0 0 4px rgba(167, 139, 250, 0.4));
       }
       .t-body {
@@ -432,9 +443,17 @@ const INTENT_LABEL: Record<string, string> = {
         border-radius: 6px;
         padding: 0 5px;
       }
+      .meta.loc {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+      }
       .empty {
         font-size: 11.5px;
         color: #94a3b8;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
       .card .time {
         color: #64748b;
@@ -473,22 +492,16 @@ export class ChatBubbleComponent {
   });
 
   emoji(t: TaskDraft): string {
-    return CATEGORY_EMOJI[t.category] ?? '🗒';
+    return t.category;
   }
 
   meta(t: TaskDraft): string {
-    const parts: string[] = [];
     const when = t.start ?? t.end;
     if (when) {
       const d = new Date(when);
-      parts.push(
-        `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-      );
-    } else {
-      parts.push('시간 미정');
+      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
     }
-    if (t.location) parts.push(`📍${t.location}`);
-    return parts.join(' · ');
+    return '시간 미정';
   }
 
   deps(t: TaskDraft): string {

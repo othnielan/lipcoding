@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ScheduleStore } from '../../state/schedule.store';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-triple-store-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   template: `
     <div class="panel">
       <div class="head">
-        <span class="ttl">🧾 트리플 스토어 <span class="count">{{ filtered().length }}</span></span>
+        <span class="ttl"><app-icon name="checklist" [size]="14" /> 트리플 스토어 <span class="count">{{ filtered().length }}</span></span>
         <input class="filter" [(ngModel)]="query" placeholder="predicate/값 검색…" />
       </div>
       @if (filtered().length === 0) {
@@ -53,6 +54,9 @@ import { ScheduleStore } from '../../state/schedule.store';
         font-weight: 700;
         font-size: 13px;
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .count {
         color: var(--muted);

@@ -3,15 +3,16 @@ import { PhoneFrameComponent } from '../chat/phone-frame.component';
 import { OntologyLiveViewComponent } from '../ontology/ontology-live-view.component';
 import { ScheduleStore } from '../../state/schedule.store';
 import { ExtractService } from '../../services/extract.service';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-live-console',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PhoneFrameComponent, OntologyLiveViewComponent],
+  imports: [PhoneFrameComponent, OntologyLiveViewComponent, IconComponent],
   template: `
     <header class="topbar">
       <div class="brand">
-        <span class="logo">🛠</span>
+        <span class="logo"><app-icon name="tools" [size]="24" /></span>
         <div>
           <div class="title">스케줄게이미피케이션</div>
           <div class="sub">발화 → 의도분류 → 온톨로지 → 퀘스트</div>
@@ -25,13 +26,13 @@ import { ExtractService } from '../../services/extract.service';
         </div>
         <div class="xptext">
           {{ store.xpProgress().current }}/{{ store.xpProgress().needed }} XP ·
-          ⚔️ {{ store.doneCount() }}/{{ store.totalCount() }}
+          <app-icon name="sword" [size]="12" /> {{ store.doneCount() }}/{{ store.totalCount() }}
         </div>
       </div>
 
       <div class="actions">
-        <button (click)="seed()" [disabled]="extract.busy()">▶ 데모 실행</button>
-        <button class="ghost" (click)="store.reset()">↺ 초기화</button>
+        <button (click)="seed()" [disabled]="extract.busy()"><app-icon name="play" [size]="13" /> 데모 실행</button>
+        <button class="ghost" (click)="store.reset()"><app-icon name="reset" [size]="13" /> 초기화</button>
       </div>
     </header>
 
@@ -73,6 +74,7 @@ import { ExtractService } from '../../services/extract.service';
       .logo {
         font-size: 26px;
         flex: 0 0 auto;
+        display: inline-flex;
       }
       .title {
         font-weight: 800;
@@ -115,6 +117,9 @@ import { ExtractService } from '../../services/extract.service';
         font-size: 11px;
         color: var(--muted);
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
       .actions {
         display: flex;
@@ -130,6 +135,9 @@ import { ExtractService } from '../../services/extract.service';
         padding: 8px 12px;
         font-size: 12.5px;
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .actions .ghost {
         background: transparent;

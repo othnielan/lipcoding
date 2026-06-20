@@ -2,28 +2,29 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { ScheduleStore } from '../../state/schedule.store';
 import { CATEGORY_EMOJI } from '../../domain/types';
 import { QuestFeaturesComponent } from './quest-features.component';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-active-quest-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [QuestFeaturesComponent],
+  imports: [QuestFeaturesComponent, IconComponent],
   template: `
     @if (store.activeQuest(); as q) {
       <div class="hero" [attr.data-kind]="q.kind">
         <div class="tag">
           <span class="dot"></span>{{ label(q.kind) }} · 지금 할 일
         </div>
-        <div class="title">🗡 {{ q.title }}</div>
+        <div class="title"><app-icon name="sword" [size]="16" /> {{ q.title }}</div>
         <div class="meta">
           @if (task(); as t) {
-            <span>{{ emoji(t.category) }} {{ t.category }}</span>
-            @if (t.location) { <span>📍 {{ t.location }}</span> }
-            @if (clock(); as c) { <span>⏰ {{ c }}</span> }
+            <span><app-icon [name]="t.category" [size]="13" /> {{ t.category }}</span>
+            @if (t.location) { <span><app-icon name="location" [size]="13" /> {{ t.location }}</span> }
+            @if (clock(); as c) { <span><app-icon name="clock" [size]="13" /> {{ c }}</span> }
           }
         </div>
       </div>
     } @else {
-      <div class="hero empty">🎉 모든 임무 완료! 새 일정을 말해보게.</div>
+      <div class="hero empty"><app-icon name="party" [size]="15" /> 모든 임무 완료! 새 일정을 말해보게.</div>
     }
     <app-quest-features />
   `,
@@ -76,6 +77,9 @@ import { QuestFeaturesComponent } from './quest-features.component';
         font-size: 15px;
         font-weight: 800;
         margin: 3px 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
       .meta {
         display: flex;
@@ -83,6 +87,17 @@ import { QuestFeaturesComponent } from './quest-features.component';
         font-size: 11.5px;
         opacity: 0.85;
         flex-wrap: wrap;
+      }
+      .meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .hero.empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
       }
       @keyframes pulse {
         0%,

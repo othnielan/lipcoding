@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AdminLogStore } from '../../state/admin-log.store';
 import { SdkExchange } from '../../domain/types';
+import { IconComponent } from '../../shared/icon.component';
 
 type Tab = 'request' | 'response';
 
@@ -12,10 +13,11 @@ type Tab = 'request' | 'response';
 @Component({
   selector: 'app-sdk-console',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     <div class="panel" [class.live]="sdk()?.source === 'copilot'">
       <div class="head">
-        <span class="ttl">🛰 SDK 요청 / 응답</span>
+        <span class="ttl"><app-icon name="link" [size]="14" /> SDK 요청 / 응답</span>
         @if (sdk(); as s) {
           <span class="tag" [class.copilot]="s.source === 'copilot'">
             {{ s.source === 'copilot' ? 'LIVE' : 'FALLBACK' }}
@@ -35,15 +37,15 @@ type Tab = 'request' | 'response';
             >
               {{ s.status ? 'HTTP ' + s.status : 'no call' }}
             </span>
-            <span class="chip ms">⏱ {{ s.elapsedMs }}ms</span>
+            <span class="chip ms"><app-icon name="clock" [size]="11" /> {{ s.elapsedMs }}ms</span>
             @if (s.usage?.total) {
-              <span class="chip tok">🪙 {{ s.usage!.total }} tok</span>
+              <span class="chip tok"><app-icon name="coin" [size]="11" /> {{ s.usage!.total }} tok</span>
             }
           </div>
         </div>
 
         @if (s.error) {
-          <div class="err">⚠ {{ s.error }}</div>
+          <div class="err"><app-icon name="alert" [size]="12" /> {{ s.error }}</div>
         }
 
         <div class="tabs">
@@ -53,7 +55,7 @@ type Tab = 'request' | 'response';
           <button class="tab" [class.on]="tab() === 'response'" (click)="tab.set('response')">
             ◂ Response
           </button>
-          <button class="copy" (click)="copy()">📋 {{ copied() ? '복사됨!' : '복사' }}</button>
+          <button class="copy" (click)="copy()"><app-icon name="copy" [size]="12" /> {{ copied() ? '복사됨!' : '복사' }}</button>
         </div>
 
         <pre class="code" [class.req]="tab() === 'request'">{{ body() }}</pre>
@@ -103,6 +105,9 @@ type Tab = 'request' | 'response';
       .ttl {
         font-weight: 700;
         font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .tag {
         font-size: 10px;
@@ -146,6 +151,9 @@ type Tab = 'request' | 'response';
         background: var(--panel-2);
         border: 1px solid var(--line);
         color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
       }
       .chip.model {
         color: #c4b5fd;
@@ -166,6 +174,9 @@ type Tab = 'request' | 'response';
         border-radius: 7px;
         padding: 6px 8px;
         margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
       .tabs {
         display: flex;
@@ -197,6 +208,9 @@ type Tab = 'request' | 'response';
         padding: 5px 10px;
         font-size: 11px;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
       .code {
         margin: 0;

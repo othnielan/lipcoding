@@ -187,6 +187,7 @@ export class SubscriptionStore {
       peerId: input.peer.id,
       peerName: input.peer.name,
       avatar: input.peer.avatar,
+      icon: input.peer.icon,
       color: input.peer.color,
       kind: input.kind,
       title: input.title,

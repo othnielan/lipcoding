@@ -8,11 +8,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { SPEECH } from '../../ports/speech.port';
 import { ExtractService } from '../../services/extract.service';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-voice-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   template: `
     <div class="composer">
       <input
@@ -23,7 +24,7 @@ import { ExtractService } from '../../services/extract.service';
         [disabled]="extract.busy()"
       />
       <button class="send" (click)="send()" [disabled]="extract.busy() || !draft().trim()">
-        ➤
+        <app-icon name="send" [size]="16" />
       </button>
       <button
         class="mic"
@@ -32,13 +33,13 @@ import { ExtractService } from '../../services/extract.service';
         (click)="toggle()"
         [title]="speech.supported ? '눌러서 말하기 / 다시 누르면 종료' : '이 브라우저는 음성인식 미지원'"
       >
-        🎤
+        <app-icon name="mic" [size]="18" />
       </button>
     </div>
     @if (listening()) {
-      <div class="hint">듣고 있어요… 말한 뒤 멈추거나 🎤를 다시 누르면 전송됩니다</div>
+      <div class="hint">듣고 있어요… 말한 뒤 멈추거나 마이크 버튼을 다시 누르면 전송됩니다</div>
     } @else if (speech.error()) {
-      <div class="error">⚠️ {{ speech.error() }}</div>
+      <div class="error"><app-icon name="alert" [size]="13" /> {{ speech.error() }}</div>
     }
   `,
   styles: [

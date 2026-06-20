@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ChatPanelComponent } from './chat-panel.component';
 import { SocialNotificationsComponent } from '../social/social-notifications.component';
 import { SubscriptionStore } from '../../state/subscription.store';
+import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
 
 @Component({
   selector: 'app-phone-frame',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChatPanelComponent, SocialNotificationsComponent],
+  imports: [ChatPanelComponent, SocialNotificationsComponent, IconComponent],
   template: `
     <div class="phone">
       <div class="statusbar">
@@ -16,8 +17,8 @@ import { CLOCK } from '../../ports/clock.port';
         <span class="right">5G &nbsp;<span class="batt">▮▮▮</span></span>
       </div>
       <div class="appbar">
-        <span class="back">‹</span>
-        <span class="name">🧙 QuestMaster</span>
+        <span class="back"><app-icon name="back" [size]="20" /></span>
+        <span class="name"><app-icon name="wizard" [size]="16" /> QuestMaster</span>
         <div class="actions">
           <button
             class="bell"
@@ -25,12 +26,12 @@ import { CLOCK } from '../../ports/clock.port';
             (click)="toggle()"
             aria-label="친구 일정 알림"
           >
-            🔔
+            <app-icon name="bell" [size]="18" />
             @if (sub.unreadCount() > 0) {
               <span class="badge">{{ sub.unreadCount() }}</span>
             }
           </button>
-          <span class="more">⋯</span>
+          <span class="more"><app-icon name="more" [size]="18" /></span>
         </div>
       </div>
       <div class="screen">
@@ -38,8 +39,10 @@ import { CLOCK } from '../../ports/clock.port';
         @if (open()) {
           <div class="sheet">
             <div class="sheet-head">
-              <span class="sheet-ttl">👥 친구 일정 구독</span>
-              <button class="close" (click)="toggle()" aria-label="닫기">✕</button>
+              <span class="sheet-ttl">친구 일정 구독</span>
+              <button class="close" (click)="toggle()" aria-label="닫기">
+                <app-icon name="close" [size]="14" />
+              </button>
             </div>
             <div class="sheet-body">
               <app-social-notifications />
@@ -106,8 +109,9 @@ import { CLOCK } from '../../ports/clock.port';
       }
       .appbar .back,
       .appbar .more {
-        color: #2f6df6;
+        color: #1f2430;
         font-size: 18px;
+        display: inline-flex;
       }
       .name {
         font-size: 14px;

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SubscriptionStore } from '../../state/subscription.store';
-import { CATEGORY_EMOJI } from '../../domain/types';
 import { NotificationKind, SocialNotification } from '../../domain/social';
+import { IconComponent } from '../../shared/icon.component';
 
 interface NotifView extends SocialNotification {
   when: string;
-  icon: string;
+  kindIcon: string;
 }
 
 /**
@@ -15,11 +15,12 @@ interface NotifView extends SocialNotification {
 @Component({
   selector: 'app-social-notifications',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     <div class="panel">
       <div class="head">
         <span class="ttl">
-          🔔 친구 일정 알림
+          <app-icon name="bell" [size]="15" /> 친구 일정 알림
           @if (sub.unreadCount() > 0) {
             <span class="badge">{{ sub.unreadCount() }}</span>
           }
@@ -40,12 +41,18 @@ interface NotifView extends SocialNotification {
             [style.--accent]="p.color"
             (click)="sub.toggle(p.id)"
           >
-            <span class="ava" [style.background]="p.color + '33'">{{ p.avatar }}</span>
+            <span class="ava" [style.background]="p.color + '33'" [style.color]="p.color"><app-icon [name]="p.icon" [size]="17" /></span>
             <span class="who">
               <span class="nm">{{ p.name }}</span>
               <span class="bio">{{ p.bio }}</span>
             </span>
-            <span class="sub-state">{{ sub.isSubscribed(p.id) ? '구독중 ✓' : '+ 구독' }}</span>
+            <span class="sub-state">
+              @if (sub.isSubscribed(p.id)) {
+                <app-icon name="check" [size]="12" /> 구독중
+              } @else {
+                + 구독
+              }
+            </span>
           </button>
         }
       </div>
@@ -60,24 +67,24 @@ interface NotifView extends SocialNotification {
             [style.--accent]="n.color"
             (click)="sub.markRead(n.id)"
           >
-            <span class="n-ava" [style.background]="n.color + '33'">{{ n.avatar }}</span>
+            <span class="n-ava" [style.background]="n.color + '33'" [style.color]="n.color"><app-icon [name]="n.icon" [size]="15" /></span>
             <div class="n-body">
               <div class="n-top">
                 <span class="n-name">{{ n.peerName }}</span>
-                <span class="n-kind" [attr.data-kind]="n.kind">{{ icon(n.kind) }} {{ kindLabel(n.kind) }}</span>
+                <span class="n-kind" [attr.data-kind]="n.kind"><app-icon [name]="n.kindIcon" [size]="11" /> {{ kindLabel(n.kind) }}</span>
                 <span class="n-ago">{{ ago(n.createdAt) }}</span>
               </div>
               <div class="n-title">
                 @if (n.category) {
-                  <span class="cat">{{ emoji(n) }}</span>
+                  <span class="cat"><app-icon [name]="n.category" [size]="13" /></span>
                 }
                 <span class="txt">{{ n.title }}</span>
               </div>
               @if (n.fireAt && n.kind !== 'subscribe') {
                 <div class="n-meta">
-                  <span class="when" [class.soon]="isSoon(n)">⏰ {{ n.when }}</span>
+                  <span class="when" [class.soon]="isSoon(n)"><app-icon name="clock" [size]="12" /> {{ n.when }}</span>
                   @if (n.location) {
-                    <span class="loc">📍 {{ n.location }}</span>
+                    <span class="loc"><app-icon name="location" [size]="12" /> {{ n.location }}</span>
                   }
                 </div>
               }
@@ -350,6 +357,18 @@ interface NotifView extends SocialNotification {
         line-height: 1.5;
         padding: 6px 2px;
       }
+      .sub-state,
+      .n-kind,
+      .when,
+      .loc {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .cat {
+        display: inline-flex;
+        align-items: center;
+      }
     `,
   ],
 })
@@ -360,25 +379,21 @@ export class SocialNotificationsComponent {
     this.sub.tick(); // reactive dependency on the periodic clock tick
     return this.sub.notifications().map((n) => ({
       ...n,
-      icon: this.icon(n.kind),
+      kindIcon: this.kindIcon(n.kind),
       when: this.whenLabel(n),
     }));
   });
 
-  emoji(n: SocialNotification): string {
-    return n.category ? (CATEGORY_EMOJI[n.category] ?? '🗒') : '🗒';
-  }
-
-  icon(kind: NotificationKind): string {
+  kindIcon(kind: NotificationKind): string {
     switch (kind) {
       case 'imminent':
-        return '🚨';
+        return 'alert';
       case 'new':
-        return '✨';
+        return 'star';
       case 'reminder':
-        return '⏳';
+        return 'hourglass';
       default:
-        return '🔗';
+        return 'bell';
     }
   }
 

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ScheduleStore } from '../../state/schedule.store';
-import { CATEGORY_EMOJI, Task } from '../../domain/types';
+import { Task } from '../../domain/types';
+import { IconComponent } from '../../shared/icon.component';
 
 interface Node {
   task: Task;
@@ -23,10 +24,11 @@ const LEFT = 30;
 @Component({
   selector: 'app-ontology-graph-canvas',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     <div class="panel">
       <div class="head">
-        <span class="ttl">📊 온톨로지 그래프</span>
+        <span class="ttl"><app-icon name="stats" [size]="14" /> 온토로지 그래프</span>
         <div class="legend">
           <span class="lg main">main</span>
           <span class="lg sub">sub</span>
@@ -64,7 +66,7 @@ const LEFT = 30;
                   [attr.stroke]="stroke(n.task)"
                   stroke-width="1.6"
                 />
-                <text x="12" y="22" class="t-title">{{ emoji(n.task) }} {{ trim(n.task.title) }}</text>
+                <text x="12" y="22" class="t-title">{{ trim(n.task.title) }}</text>
                 <text x="12" y="42" class="t-meta">{{ meta(n.task) }}</text>
               </g>
             }
@@ -90,6 +92,9 @@ const LEFT = 30;
       .ttl {
         font-weight: 700;
         font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .legend {
         display: flex;
@@ -200,16 +205,13 @@ export class OntologyGraphCanvasComponent {
     if (t.status === 'done' || t.status === 'skipped') return '#5a6172';
     return t.priority === 'main' ? '#f59e0b' : '#10b981';
   }
-  emoji(t: Task): string {
-    return CATEGORY_EMOJI[t.category];
-  }
   trim(s: string): string {
     return s.length > 16 ? s.slice(0, 15) + '…' : s;
   }
   meta(t: Task): string {
     const time = t.start || t.end ? clock(t.start ?? t.end!) : '시간 미정';
-    const loc = t.location ? ` · 📍${t.location}` : '';
-    const st = t.status === 'done' ? ' · ✅' : '';
+    const loc = t.location ? ` · ${t.location}` : '';
+    const st = t.status === 'done' ? ' · 완료' : '';
     return `${t.priority}${st} · ${time}${loc}`;
   }
 }

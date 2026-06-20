@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ScheduleStore } from '../../state/schedule.store';
 import { CLOCK } from '../../ports/clock.port';
-import { CATEGORY_EMOJI, CategoryName, Task } from '../../domain/types';
+import { CategoryName, Task } from '../../domain/types';
+import { IconComponent } from '../../shared/icon.component';
 
 type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats';
 
@@ -30,11 +31,12 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
 @Component({
   selector: 'app-quest-features',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     <div class="bar">
       @for (f of features; track f.key) {
         <button class="chip" [class.on]="active() === f.key" (click)="toggle(f.key)">
-          <span class="ic">{{ f.icon }}</span>
+          <span class="ic"><app-icon [name]="f.icon" [size]="14" /></span>
           <span class="lb">{{ f.label }}</span>
           @if (f.key === 'todo' && todoTasks().length) {
             <span class="cnt">{{ todoTasks().length }}</span>
@@ -49,11 +51,11 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
           <div class="tabs">
             @for (f of features; track f.key) {
               <button class="tab" [class.on]="active() === f.key" (click)="select(f.key)">
-                {{ f.icon }} {{ f.label }}
+                <app-icon [name]="f.icon" [size]="13" /> {{ f.label }}
               </button>
             }
           </div>
-          <button class="x" (click)="close()" aria-label="닫기">✕</button>
+          <button class="x" (click)="close()" aria-label="닫기"><app-icon name="close" [size]="14" /></button>
         </div>
         <div class="s-body">
           @switch (key) {
@@ -62,15 +64,15 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                 <ul class="list">
                   @for (t of todoTasks(); track t.id) {
                     <li class="row" [attr.data-pri]="t.priority">
-                      <button class="box" (click)="store.toggleTaskDone(t.id)" aria-label="완료">○</button>
-                      <span class="cat">{{ emoji(t.category) }}</span>
+                      <button class="box" (click)="store.toggleTaskDone(t.id)" aria-label="완료"><app-icon name="circle" [size]="14" /></button>
+                      <span class="cat"><app-icon [name]="t.category" [size]="15" /></span>
                       <span class="tx">{{ t.title }}</span>
-                      @if (timeOf(t); as tm) { <span class="tm">⏰ {{ tm }}</span> }
+                      @if (timeOf(t); as tm) { <span class="tm"><app-icon name="clock" [size]="12" /> {{ tm }}</span> }
                     </li>
                   }
                 </ul>
               } @else {
-                <div class="empty">🎉 남은 할 일이 없어요!</div>
+                <div class="empty"><app-icon name="party" [size]="15" /> 남은 할 일이 없어요!</div>
               }
             }
 
@@ -84,9 +86,9 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                   @for (t of allTasks(); track t.id) {
                     <li class="row" [class.done]="t.status === 'done'">
                       <button class="box" [class.checked]="t.status === 'done'" (click)="store.toggleTaskDone(t.id)" aria-label="토글">
-                        {{ t.status === 'done' ? '✓' : '○' }}
+                        <app-icon [name]="t.status === 'done' ? 'check' : 'circle'" [size]="14" />
                       </button>
-                      <span class="cat">{{ emoji(t.category) }}</span>
+                      <span class="cat"><app-icon [name]="t.category" [size]="15" /></span>
                       <span class="tx">{{ t.title }}</span>
                       @if (t.status === 'skipped') { <span class="skip">건너뜀</span> }
                     </li>
@@ -104,7 +106,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                     <div class="wh"><b>{{ d.label }}</b> {{ d.dayNum }}</div>
                     @for (t of d.tasks; track t.id) {
                       <div class="wt" [attr.data-pri]="t.priority" [class.done]="t.status === 'done'">
-                        {{ emoji(t.category) }} {{ t.title }}
+                        <app-icon [name]="t.category" [size]="12" /> {{ t.title }}
                       </div>
                     } @empty { <div class="wn">—</div> }
                   </div>
@@ -112,9 +114,9 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
               </div>
               @if (untimed().length) {
                 <div class="untimed">
-                  <div class="ut-h">⏳ 시간 미지정</div>
+                  <div class="ut-h"><app-icon name="hourglass" [size]="12" /> 시간 미지정</div>
                   @for (t of untimed(); track t.id) {
-                    <span class="ut-chip">{{ emoji(t.category) }} {{ t.title }}</span>
+                    <span class="ut-chip"><app-icon [name]="t.category" [size]="12" /> {{ t.title }}</span>
                   }
                 </div>
               }
@@ -146,7 +148,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                   <div class="dl-h">{{ sd }}</div>
                   @for (t of dayTasks(); track t.id) {
                     <div class="dl-row" [attr.data-pri]="t.priority">
-                      {{ emoji(t.category) }} {{ t.title }}
+                      <app-icon [name]="t.category" [size]="13" /> {{ t.title }}
                       @if (timeOf(t); as tm) { <span class="tm">· {{ tm }}</span> }
                     </div>
                   } @empty { <div class="empty sm">이 날엔 일정이 없어요.</div> }
@@ -164,15 +166,15 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                 <div class="sec-h">카테고리별</div>
                 @for (c of byCategory(); track c.name) {
                   <div class="srow">
-                    <span class="sl">{{ emoji(c.name) }} {{ c.name }}</span>
+                    <span class="sl"><app-icon [name]="c.name" [size]="13" /> {{ c.name }}</span>
                     <div class="sbar"><span [style.width.%]="c.pct"></span></div>
                     <span class="sv">{{ c.count }}</span>
                   </div>
                 }
                 <div class="sec-h">우선순위</div>
                 <div class="pri-row">
-                  <span class="pri main">⚔️ 메인 {{ mainCount() }}</span>
-                  <span class="pri side">🗡 사이드 {{ sideCount() }}</span>
+                  <span class="pri main"><app-icon name="sword" [size]="13" /> 메인 {{ mainCount() }}</span>
+                  <span class="pri side"><app-icon name="sword" [size]="13" /> 사이드 {{ sideCount() }}</span>
                 </div>
               </div>
             }
@@ -383,6 +385,10 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
       .pri { flex: 1; text-align: center; font-size: 12px; font-weight: 700; border-radius: 9px; padding: 8px; }
       .pri.main { background: #fff7e6; color: #92600b; border: 1px solid #f5c971; }
       .pri.side { background: #e7fbf0; color: #0c5238; border: 1px solid #7fd9ad; }
+      .tab, .tm, .ut-chip, .sl, .ut-h, .dl-h { display: inline-flex; align-items: center; gap: 4px; }
+      .wt, .dl-row { display: flex; align-items: center; gap: 5px; }
+      .empty { display: flex; align-items: center; justify-content: center; gap: 5px; }
+      .pri { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
     `,
   ],
 })
@@ -391,11 +397,11 @@ export class QuestFeaturesComponent {
   private readonly clock = inject(CLOCK);
 
   readonly features: { key: FeatureKey; icon: string; label: string }[] = [
-    { key: 'todo', icon: '📋', label: '투두' },
-    { key: 'check', icon: '✅', label: '체크리스트' },
-    { key: 'week', icon: '📅', label: '주간' },
-    { key: 'month', icon: '🗓', label: '월간' },
-    { key: 'stats', icon: '📊', label: '통계' },
+    { key: 'todo', icon: 'todo', label: '투두' },
+    { key: 'check', icon: 'checklist', label: '체크리스트' },
+    { key: 'week', icon: 'week', label: '주간' },
+    { key: 'month', icon: 'month', label: '월간' },
+    { key: 'stats', icon: 'stats', label: '통계' },
   ];
   readonly monthHeaders = MONTH_LABEL;
 
@@ -483,14 +489,7 @@ export class QuestFeaturesComponent {
   selectDay(key: string): void {
     this.selectedDay.set(key);
   }
-  titleOf(key: FeatureKey): string {
-    const f = this.features.find((x) => x.key === key);
-    return f ? `${f.icon} ${f.label}` : '';
-  }
 
-  emoji(cat: CategoryName): string {
-    return CATEGORY_EMOJI[cat];
-  }
   timeOf(t: Task): string | null {
     const v = t.start ?? t.end;
     if (!v) return null;

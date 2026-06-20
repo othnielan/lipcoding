@@ -19,6 +19,8 @@ export interface PeerUser {
   id: string;
   name: string;
   avatar: string;
+  /** Flat icon name (see IconComponent) used as the user's avatar glyph. */
+  icon: string;
   color: string;
   bio: string;
   events: PeerEvent[];
@@ -32,6 +34,7 @@ export interface SocialNotification {
   peerId: string;
   peerName: string;
   avatar: string;
+  icon: string;
   color: string;
   kind: NotificationKind;
   title: string;
@@ -50,6 +53,7 @@ export const MOCK_PEERS: PeerUser[] = [
     id: 'u_kim',
     name: '김용사',
     avatar: '⚔️',
+    icon: 'sword',
     color: '#f59e0b',
     bio: '메인 퀘스트 사냥꾼',
     events: [
@@ -62,6 +66,7 @@ export const MOCK_PEERS: PeerUser[] = [
     id: 'u_lee',
     name: '이마법사',
     avatar: '🧙‍♀️',
+    icon: 'wizard',
     color: '#8b5cf6',
     bio: '지식의 탑 연구원',
     events: [
@@ -73,6 +78,7 @@ export const MOCK_PEERS: PeerUser[] = [
     id: 'u_park',
     name: '박궁수',
     avatar: '🏹',
+    icon: 'archer',
     color: '#10b981',
     bio: '체력 만렙 도전 중',
     events: [
@@ -84,6 +90,7 @@ export const MOCK_PEERS: PeerUser[] = [
     id: 'u_choi',
     name: '최성기사',
     avatar: '🛡️',
+    icon: 'shield',
     color: '#3b82f6',
     bio: '심부름 퀘스트 클리어러',
     events: [
