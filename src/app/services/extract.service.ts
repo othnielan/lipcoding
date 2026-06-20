@@ -30,6 +30,7 @@ export class ExtractService {
       const result = await this.llm.extract(input);
       const elapsed = Math.round(performance.now() - started);
       const source = this.llm.lastSource?.() ?? (prompt.system.startsWith('[Copilot') ? 'copilot' : 'heuristic');
+      const sdk = this.llm.lastSdk?.() ?? null;
 
       // 1) Show the SDK-produced values in the chat first.
       this.store.appendExtract({
@@ -75,6 +76,7 @@ export class ExtractService {
         result,
         elapsedMs: elapsed,
         source,
+        sdk,
       });
     } catch {
       this.store.appendNpc('잠시 문제가 생겼다네. 조금만 더 또렷이 말해주겠나?');

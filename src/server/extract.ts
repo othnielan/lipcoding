@@ -3,7 +3,7 @@
 // JSON-schema structured output when credentials are configured, and falls
 // back to the offline heuristic parser otherwise (demo safety).
 
-import { CategoryName, ExtractResult, IntentName, Priority, TaskDraft } from '../app/domain/types';
+import { CategoryName, ExtractResult, IntentName, Priority, SdkExchange, TaskDraft } from '../app/domain/types';
 import { parseUtterance } from '../app/domain/nlu';
 
 export interface ExtractRequest {
@@ -87,30 +87,111 @@ export function parseRequest(body: unknown): ExtractRequest {
 /** Runs extraction, preferring the LLM and degrading to the heuristic parser. */
 export async function runExtract(
   req: ExtractRequest,
-): Promise<{ result: ExtractResult; source: ExtractSource }> {
+): Promise<{ result: ExtractResult; source: ExtractSource; sdk: SdkExchange }> {
   const apiKey =
     process.env['COPILOT_API_KEY'] ||
     process.env['OPENAI_API_KEY'] ||
     process.env['GITHUB_TOKEN'];
 
+  const baseUrl = (process.env['COPILOT_BASE_URL'] || 'https://api.openai.com/v1').replace(/\/$/, '');
+  const model = process.env['COPILOT_MODEL'] || 'gpt-4o-mini';
+
   if (apiKey && process.env['MOCK_LLM'] !== 'true') {
+    const startedAt = Date.now();
     try {
-      const result = await callLlm(req, apiKey);
-      return { result, source: 'copilot' };
+      const { result, requestBody, raw, statusCode } = await callLlm(req, apiKey);
+      return {
+        result,
+        source: 'copilot',
+        sdk: {
+          source: 'copilot',
+          endpoint: `${baseUrl}/chat/completions`,
+          model,
+          status: statusCode,
+          elapsedMs: Date.now() - startedAt,
+          request: requestBody,
+          response: raw,
+          usage: extractUsage(raw),
+        },
+      };
     } catch (err) {
-      console.warn('[extract] LLM call failed, falling back to heuristic:', (err as Error).message);
+      const message = (err as Error).message;
+      console.warn('[extract] LLM call failed, falling back to heuristic:', message);
+      return {
+        result: parseUtterance(req.utterance, req.nowISO),
+        source: 'heuristic',
+        sdk: {
+          source: 'heuristic',
+          endpoint: `${baseUrl}/chat/completions`,
+          model,
+          status: 0,
+          elapsedMs: Date.now() - startedAt,
+          request: buildRequestBody(req, model),
+          response: null,
+          usage: null,
+          error: message,
+        },
+      };
     }
   }
 
-  return { result: parseUtterance(req.utterance, req.nowISO), source: 'heuristic' };
+  const startedAt = Date.now();
+  return {
+    result: parseUtterance(req.utterance, req.nowISO),
+    source: 'heuristic',
+    sdk: {
+      source: 'heuristic',
+      endpoint: '(local) domain/nlu.parseUtterance',
+      model: 'heuristic-rules',
+      status: 0,
+      elapsedMs: Date.now() - startedAt,
+      request: { utterance: req.utterance, nowISO: req.nowISO, tz: req.tz },
+      response: null,
+      usage: null,
+      error: apiKey ? 'MOCK_LLM=true' : 'no API key configured',
+    },
+  };
 }
 
-async function callLlm(req: ExtractRequest, apiKey: string): Promise<ExtractResult> {
+/** Builds the chat.completions request body so it can be shown even on fallback. */
+function buildRequestBody(req: ExtractRequest, model: string) {
+  return {
+    model,
+    temperature: 0.2,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: `nowISO: ${req.nowISO}\ntz: ${req.tz}\nutterance: "${req.utterance}"`,
+      },
+    ],
+    response_format: {
+      type: 'json_schema',
+      json_schema: { name: 'ExtractResult', strict: true, schema: RESPONSE_SCHEMA },
+    },
+  };
+}
+
+function extractUsage(raw: unknown): SdkExchange['usage'] {
+  const u = (raw as { usage?: Record<string, number> } | null)?.usage;
+  if (!u) return null;
+  return {
+    prompt: u['prompt_tokens'],
+    completion: u['completion_tokens'],
+    total: u['total_tokens'],
+  };
+}
+
+async function callLlm(
+  req: ExtractRequest,
+  apiKey: string,
+): Promise<{ result: ExtractResult; requestBody: unknown; raw: unknown; statusCode: number }> {
   const baseUrl = (process.env['COPILOT_BASE_URL'] || 'https://api.openai.com/v1').replace(
     /\/$/,
     '',
   );
   const model = process.env['COPILOT_MODEL'] || 'gpt-4o-mini';
+  const requestBody = buildRequestBody(req, model);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
@@ -122,21 +203,7 @@ async function callLlm(req: ExtractRequest, apiKey: string): Promise<ExtractResu
         authorization: `Bearer ${apiKey}`,
       },
       signal: controller.signal,
-      body: JSON.stringify({
-        model,
-        temperature: 0.2,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: `nowISO: ${req.nowISO}\ntz: ${req.tz}\nutterance: "${req.utterance}"`,
-          },
-        ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: { name: 'ExtractResult', strict: true, schema: RESPONSE_SCHEMA },
-        },
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!res.ok) {
@@ -147,7 +214,12 @@ async function callLlm(req: ExtractRequest, apiKey: string): Promise<ExtractResu
     if (typeof content !== 'string') {
       throw new Error('empty LLM content');
     }
-    return validateResult(JSON.parse(content));
+    return {
+      result: validateResult(JSON.parse(content)),
+      requestBody,
+      raw: data,
+      statusCode: res.status,
+    };
   } finally {
     clearTimeout(timeout);
   }

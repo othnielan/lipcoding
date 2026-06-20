@@ -29,9 +29,9 @@ const angularApp = new AngularNodeAppEngine();
 app.post('/api/extract', express.json({ limit: '16kb' }), async (req, res) => {
   try {
     const input = parseRequest(req.body);
-    const { result, source } = await runExtract(input);
+    const { result, source, sdk } = await runExtract(input);
     res.setHeader('X-Extract-Source', source);
-    res.json(result);
+    res.json({ ...result, _sdk: sdk });
   } catch (err) {
     const message = (err as Error).message;
     if (message === 'invalid utterance') {
