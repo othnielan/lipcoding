@@ -3,15 +3,17 @@ import { PhoneFrameComponent } from '../chat/phone-frame.component';
 import { OntologyLiveViewComponent } from '../ontology/ontology-live-view.component';
 import { ScheduleStore } from '../../state/schedule.store';
 import { ExtractService } from '../../services/extract.service';
+import { PersonaStore } from '../../state/persona.store';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-live-console',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PhoneFrameComponent, OntologyLiveViewComponent],
+  imports: [PhoneFrameComponent, OntologyLiveViewComponent, IconComponent],
   template: `
     <header class="topbar">
       <div class="brand">
-        <span class="logo">🛠</span>
+        <span class="logo"><app-icon name="tools" [size]="24" /></span>
         <div>
           <div class="title">스케줄게이미피케이션</div>
           <div class="sub">발화 → 의도분류 → 온톨로지 → 퀘스트</div>
@@ -25,13 +27,25 @@ import { ExtractService } from '../../services/extract.service';
         </div>
         <div class="xptext">
           {{ store.xpProgress().current }}/{{ store.xpProgress().needed }} XP ·
-          ⚔️ {{ store.doneCount() }}/{{ store.totalCount() }}
+          <app-icon name="sword" [size]="12" /> {{ store.doneCount() }}/{{ store.totalCount() }}
         </div>
       </div>
 
       <div class="actions">
-        <button (click)="seed()" [disabled]="extract.busy()">▶ 데모 실행</button>
-        <button class="ghost" (click)="store.reset()">↺ 초기화</button>
+        <button
+          class="persona"
+          [style.--accent]="persona.selected().accent"
+          (click)="changePersona()"
+          title="페르소나 변경"
+        >
+          <span class="p-ic" [style.background]="persona.selected().gradient">
+            <app-icon [name]="persona.selected().icon" [size]="14" />
+          </span>
+          <span class="p-name">{{ persona.selected().name }}</span>
+          <app-icon name="more" [size]="14" />
+        </button>
+        <button (click)="seed()" [disabled]="extract.busy()"><app-icon name="play" [size]="13" /> 데모 실행</button>
+        <button class="ghost" (click)="store.reset()"><app-icon name="reset" [size]="13" /> 초기화</button>
       </div>
     </header>
 
@@ -73,6 +87,7 @@ import { ExtractService } from '../../services/extract.service';
       .logo {
         font-size: 26px;
         flex: 0 0 auto;
+        display: inline-flex;
       }
       .title {
         font-weight: 800;
@@ -115,11 +130,38 @@ import { ExtractService } from '../../services/extract.service';
         font-size: 11px;
         color: var(--muted);
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
       }
       .actions {
         display: flex;
         gap: 8px;
         flex: 0 0 auto;
+      }
+      .actions .persona {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--accent);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 5px 10px 5px 6px;
+        font-size: 12.5px;
+        font-weight: 700;
+      }
+      .actions .persona .p-ic {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        flex: 0 0 auto;
+      }
+      .actions .persona .p-name {
+        white-space: nowrap;
       }
       .actions button {
         border: 1px solid var(--line);
@@ -130,6 +172,9 @@ import { ExtractService } from '../../services/extract.service';
         padding: 8px 12px;
         font-size: 12.5px;
         white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .actions .ghost {
         background: transparent;
@@ -171,6 +216,12 @@ import { ExtractService } from '../../services/extract.service';
 export class LiveConsolePage {
   readonly store = inject(ScheduleStore);
   readonly extract = inject(ExtractService);
+  readonly persona = inject(PersonaStore);
+
+  changePersona(): void {
+    // Reopens the persona picker inside the phone simulator.
+    this.persona.resetOnboarding();
+  }
 
   seed(): void {
     void this.extract.submit(

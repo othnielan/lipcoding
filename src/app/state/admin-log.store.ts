@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { ExtractResult, IntentName } from '../domain/types';
+import { ExtractResult, IntentName, SdkExchange } from '../domain/types';
 
 export interface UtteranceLog {
   id: string;
@@ -11,6 +11,8 @@ export interface UtteranceLog {
   result: ExtractResult;
   elapsedMs: number;
   source: 'copilot' | 'heuristic';
+  /** Raw request/response exchange with the LLM endpoint, for the SDK console. */
+  sdk?: SdkExchange | null;
 }
 
 @Injectable({ providedIn: 'root' })

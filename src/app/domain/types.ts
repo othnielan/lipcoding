@@ -11,7 +11,8 @@ export type IntentName =
   | 'skip_quest'
   | 'next_quest'
   | 'query'
-  | 'cancel';
+  | 'cancel'
+  | 'chat';
 
 export interface Task {
   id: string;
@@ -74,6 +75,23 @@ export interface ExtractResult {
   intent: IntentName;
   tasks: TaskDraft[];
   npcReply: string;
+}
+
+/** Raw request/response exchange with the LLM endpoint, surfaced for the SDK console panel. */
+export interface SdkExchange {
+  source: 'copilot' | 'heuristic';
+  endpoint: string;
+  model: string;
+  status: number;
+  elapsedMs: number;
+  /** Request payload sent to the chat.completions endpoint. */
+  request: unknown;
+  /** Raw response body returned by the endpoint (trimmed of nothing). */
+  response: unknown;
+  /** Token usage when reported by the provider. */
+  usage?: { prompt?: number; completion?: number; total?: number } | null;
+  /** Present when the live call failed and a fallback was used. */
+  error?: string;
 }
 
 export const CATEGORY_EMOJI: Record<CategoryName, string> = {

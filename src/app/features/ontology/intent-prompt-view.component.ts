@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AdminLogStore } from '../../state/admin-log.store';
+import { IconComponent } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-intent-prompt-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
   template: `
     <div class="panel">
       <div class="head">
-        <span class="ttl">🧠 의도 분류 (Intent)</span>
+        <span class="ttl"><app-icon name="wizard" [size]="14" /> 의도 분류 (Intent)</span>
         @if (admin.latest(); as l) {
           <span class="src" [class.copilot]="l.source === 'copilot'">
             {{ l.source === 'copilot' ? 'Copilot SDK' : 'Local NLU' }} · {{ l.elapsedMs }}ms
@@ -20,7 +22,7 @@ import { AdminLogStore } from '../../state/admin-log.store';
           <span class="intent-badge" [attr.data-intent]="l.intent">{{ l.intent }}</span>
           <span class="utt">“{{ l.utterance }}”</span>
         </div>
-        <div class="npc">🧙 {{ l.result.npcReply }}</div>
+        <div class="npc"><app-icon name="wizard" [size]="13" /> {{ l.result.npcReply }}</div>
 
         <div class="accordions">
           <button class="acc" (click)="toggle('json')">
@@ -60,6 +62,9 @@ import { AdminLogStore } from '../../state/admin-log.store';
       .ttl {
         font-weight: 700;
         font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
       }
       .src {
         font-size: 10.5px;
@@ -103,6 +108,9 @@ import { AdminLogStore } from '../../state/admin-log.store';
         margin-top: 8px;
         font-size: 12.5px;
         color: #fcd9a3;
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
       }
       .accordions {
         margin-top: 10px;

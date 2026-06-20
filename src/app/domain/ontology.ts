@@ -85,6 +85,12 @@ export class OntologyGraph {
     );
   }
 
+  setStatus(taskId: string, status: Task['status']): OntologyGraph {
+    return new OntologyGraph(
+      this.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
+    );
+  }
+
   removeLast(): OntologyGraph {
     if (this.tasks.length === 0) return this;
     return new OntologyGraph(this.tasks.slice(0, -1));

@@ -6,6 +6,15 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { parseRequest, runExtract } from './server/extract';
+
+// Load .env (LLM credentials) when present. Native Node loader, no dependency.
+// Safe to ignore in environments without a .env file (e.g. production prerender).
+try {
+  (process as NodeJS.Process & { loadEnvFile?: (p?: string) => void }).loadEnvFile?.();
+} catch {
+  /* no .env file — fall back to heuristic extractor */
+}
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -13,16 +22,26 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * POST /api/extract — Copilot SDK powered utterance → structured schedule.
+ * Falls back to the offline heuristic parser when no API key is configured
+ * or the LLM call fails, so the demo always responds.
  */
+app.post('/api/extract', express.json({ limit: '16kb' }), async (req, res) => {
+  try {
+    const input = parseRequest(req.body);
+    const { result, source, sdk } = await runExtract(input);
+    res.setHeader('X-Extract-Source', source);
+    res.json({ ...result, _sdk: sdk });
+  } catch (err) {
+    const message = (err as Error).message;
+    if (message === 'invalid utterance') {
+      res.status(400).json({ error: 'invalid utterance' });
+      return;
+    }
+    console.error('[api/extract] error:', message);
+    res.status(500).json({ error: 'extraction failed' });
+  }
+});
 
 /**
  * Serve static files from /browser

@@ -5,12 +5,14 @@ import { QuestEngine } from '../domain/quest-engine';
 import { XpCalculator } from '../domain/xp';
 import { newId } from '../domain/id';
 import { ChatMessage, ExtractCard, Quest, TaskDraft } from '../domain/types';
+import { PersonaStore } from './persona.store';
 
 const STORAGE_KEY = 'schedule-gamification:v1';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleStore {
   private readonly clock = inject(CLOCK);
+  private readonly persona = inject(PersonaStore);
 
   private readonly _graph = signal<OntologyGraph>(OntologyGraph.empty());
   private readonly _messages = signal<ChatMessage[]>([
@@ -46,6 +48,8 @@ export class ScheduleStore {
 
   constructor() {
     this.restore();
+    // Chat history is not persisted, so greet in the selected persona's voice.
+    this.setGreeting(this.persona.selected().greeting);
     effect(() => {
       const snapshot = { tasks: this._graph().toJSON(), xp: this._xp() };
       if (typeof localStorage !== 'undefined') {
@@ -66,6 +70,13 @@ export class ScheduleStore {
   }
   appendSystem(text: string): void {
     this.append('system', text);
+  }
+
+  /** Resets the chat history to a single greeting (used on persona switch). */
+  setGreeting(text: string): void {
+    this._messages.set([
+      { id: newId('m'), role: 'npc', text, ts: new Date().toISOString() },
+    ]);
   }
 
   /** Surfaces the SDK/LLM extraction result as a card inside the chat. */
@@ -93,6 +104,20 @@ export class ScheduleStore {
     return q;
   }
 
+  /** Toggle a single task done/undone (used by the todo & checklist views). */
+  toggleTaskDone(taskId: string): void {
+    const t = this.tasks().find((x) => x.id === taskId);
+    if (!t) return;
+    if (t.status === 'done') {
+      this._graph.update((g) => g.setStatus(taskId, 'pending'));
+      this._xp.update((v) => Math.max(0, v - t.xpReward));
+    } else {
+      this._graph.update((g) => g.setStatus(taskId, 'done'));
+      this._xp.update((v) => v + t.xpReward);
+    }
+    this._tick.update((v) => v + 1);
+  }
+
   cancelLast(): void {
     this._graph.update((g) => g.removeLast());
   }
@@ -104,14 +129,7 @@ export class ScheduleStore {
   reset(): void {
     this._graph.set(OntologyGraph.empty());
     this._xp.set(0);
-    this._messages.set([
-      {
-        id: newId('m'),
-        role: 'npc',
-        text: '보드를 초기화했다네. 새로운 모험을 시작하게!',
-        ts: new Date().toISOString(),
-      },
-    ]);
+    this.setGreeting(this.persona.selected().greeting);
   }
 
   private append(role: ChatMessage['role'], text: string): void {
