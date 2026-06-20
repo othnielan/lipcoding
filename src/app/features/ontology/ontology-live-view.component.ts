@@ -3,7 +3,6 @@ import { IntentPromptViewComponent } from './intent-prompt-view.component';
 import { OntologyGraphCanvasComponent } from './ontology-graph-canvas.component';
 import { TripleStoreTableComponent } from './triple-store-table.component';
 import { SdkConsoleComponent } from './sdk-console.component';
-import { SocialNotificationsComponent } from '../social/social-notifications.component';
 
 @Component({
   selector: 'app-ontology-live-view',
@@ -13,11 +12,9 @@ import { SocialNotificationsComponent } from '../social/social-notifications.com
     OntologyGraphCanvasComponent,
     TripleStoreTableComponent,
     SdkConsoleComponent,
-    SocialNotificationsComponent,
   ],
   template: `
     <div class="stack">
-      <app-social-notifications />
       <app-intent-prompt-view />
       <app-sdk-console />
       <app-ontology-graph-canvas />
