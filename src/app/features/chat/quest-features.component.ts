@@ -55,13 +55,12 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
     @if (active(); as key) {
       <div class="sheet">
         <div class="s-head">
-          <div class="tabs">
-            @for (f of features; track f.key) {
-              <button class="tab" [class.on]="active() === f.key" (click)="select(f.key)">
-                <app-icon [name]="f.icon" [size]="13" /> {{ f.label }}
-              </button>
-            }
-          </div>
+          @if (activeFeature(); as f) {
+            <span class="s-ttl">
+              <span class="s-ic"><app-icon [name]="f.icon" [size]="16" /></span>
+              {{ f.label }}
+            </span>
+          }
           <button class="x" (click)="close()" aria-label="닫기"><app-icon name="close" [size]="14" /></button>
         </div>
         <div class="s-body">
@@ -268,34 +267,28 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 9px 11px;
+        padding: 11px 13px;
         background: #fff;
         border-bottom: 1px solid #e6e9ef;
       }
-      .tabs {
-        display: flex;
-        gap: 5px;
-        overflow-x: auto;
-        flex: 1;
+      .s-ttl {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 800;
+        color: #1f2430;
       }
-      .tab {
+      .s-ic {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: #eef2fd;
+        color: #2f6df6;
+        display: grid;
+        place-items: center;
         flex: 0 0 auto;
-        border: 1px solid #dfe3ea;
-        background: #f4f6fa;
-        border-radius: 999px;
-        padding: 5px 9px;
-        font-size: 11.5px;
-        font-weight: 700;
-        color: #3a4252;
-        cursor: pointer;
-        white-space: nowrap;
       }
-      .tab.on {
-        background: #2f6df6;
-        border-color: #2f6df6;
-        color: #fff;
-      }
-      .s-ttl { font-size: 14px; font-weight: 800; color: #1f2430; }
       .x {
         border: none;
         background: #eef1f6;
@@ -436,6 +429,7 @@ export class QuestFeaturesComponent {
   readonly monthHeaders = MONTH_LABEL;
 
   readonly active = signal<FeatureKey | null>(null);
+  readonly activeFeature = computed(() => this.features.find((f) => f.key === this.active()) ?? null);
   readonly selectedDay = signal<string | null>(null);
 
   readonly allTasks = computed(() =>
@@ -504,12 +498,6 @@ export class QuestFeaturesComponent {
   toggle(key: FeatureKey): void {
     this.active.update((v) => (v === key ? null : key));
     if (this.active() === 'month' && !this.selectedDay()) {
-      this.selectedDay.set(this.dateKey(this.clock.now()));
-    }
-  }
-  select(key: FeatureKey): void {
-    this.active.set(key);
-    if (key === 'month' && !this.selectedDay()) {
       this.selectedDay.set(this.dateKey(this.clock.now()));
     }
   }

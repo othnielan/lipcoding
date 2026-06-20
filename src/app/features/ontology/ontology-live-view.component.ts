@@ -15,9 +15,9 @@ import { SdkConsoleComponent } from './sdk-console.component';
   ],
   template: `
     <div class="stack">
+      <app-ontology-graph-canvas />
       <app-intent-prompt-view />
       <app-sdk-console />
-      <app-ontology-graph-canvas />
       <app-triple-store-table />
     </div>
   `,
