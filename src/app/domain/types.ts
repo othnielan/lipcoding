@@ -11,7 +11,8 @@ export type IntentName =
   | 'skip_quest'
   | 'next_quest'
   | 'query'
-  | 'cancel';
+  | 'cancel'
+  | 'chat';
 
 export interface Task {
   id: string;

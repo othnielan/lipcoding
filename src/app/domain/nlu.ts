@@ -62,7 +62,21 @@ function detectIntent(text: string): IntentName {
   if (/(취소|빼줘|지워|삭제)/.test(text)) return 'cancel';
   if (/(남았|뭐\s?하|뭐\s?남|보여줘|목록|뭐가)/.test(text)) return 'query';
   if (/(다음|넥스트)/.test(text)) return 'next_quest';
+  if (isGeneralChat(text)) return 'chat';
   return 'add_schedule';
+}
+
+/** Heuristic: a general question/chitchat that is not about managing the schedule. */
+function isGeneralChat(text: string): boolean {
+  const scheduleSignal =
+    /(\d+\s?시|아침|점심|저녁|오전|오후|새벽|밤|내일|모레|오늘|약속|미팅|회의|마감|수업|숙제|운동|헬스|반납|예약|일정)/.test(
+      text,
+    );
+  if (scheduleSignal) return false;
+  if (/[?？]\s*$/.test(text)) return true;
+  return /(누구|뭐야|뭔데|어때|왜|어떻게|어떡|알려|설명|추천|방법|만들|뜻|의미|차이|가능해|할\s?수\s?있|안녕|고마|반가|잘\s?지|소개)/.test(
+    text,
+  );
 }
 
 function replyFor(intent: IntentName): string {
@@ -77,6 +91,8 @@ function replyFor(intent: IntentName): string {
       return '남은 임무를 보드에서 확인하게, 용사여.';
     case 'next_quest':
       return '다음 임무를 안내하지.';
+    case 'chat':
+      return '용사여, 무엇이든 물어보게. (지금은 오프라인이라 신탁의 지혜가 닿지 않으니, 온라인 연결 시 더 깊이 답해주겠네.)';
     default:
       return '말씀하시게.';
   }

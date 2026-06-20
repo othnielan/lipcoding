@@ -8,6 +8,7 @@ const INTENT_LABEL: Record<string, string> = {
   next_quest: '다음 퀘스트',
   query: '조회',
   cancel: '취소',
+  chat: '일반 대화',
 };
 
 @Component({
@@ -50,7 +51,13 @@ const INTENT_LABEL: Record<string, string> = {
               }
             </ul>
           } @else {
-            <div class="empty">추출된 일정 없음 · 의도만 분류됨</div>
+            <div class="empty">
+              {{
+                card()!.intent === 'chat' || card()!.intent === 'query'
+                  ? '💬 일정 외 응답 · 아래 답변 참고'
+                  : '추출된 일정 없음 · 의도만 분류됨'
+              }}
+            </div>
           }
           <span class="time">{{ time() }}</span>
         </div>
