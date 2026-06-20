@@ -6,11 +6,19 @@ import { NotesStore } from '../../state/notes.store';
 import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
 import { PersonaStore } from '../../state/persona.store';
+import { PhoneSplashComponent } from '../onboarding/phone-splash.component';
+import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
 
 @Component({
   selector: 'app-phone-frame',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChatPanelComponent, SocialNotificationsComponent, IconComponent],
+  imports: [
+    ChatPanelComponent,
+    SocialNotificationsComponent,
+    IconComponent,
+    PhoneSplashComponent,
+    PersonaPickerComponent,
+  ],
   template: `
     <div class="phone">
       <div class="statusbar">
@@ -38,6 +46,13 @@ import { PersonaStore } from '../../state/persona.store';
       </div>
       <div class="screen">
         <app-chat-panel />
+        @if (!persona.onboarded()) {
+          @if (splashSeen()) {
+            <app-persona-picker />
+          } @else {
+            <app-phone-splash (done)="splashSeen.set(true)" />
+          }
+        }
         @if (toast(); as t) {
           <div class="toast">
             <span class="t-ic"><app-icon name="note" [size]="16" /></span>
@@ -303,12 +318,18 @@ export class PhoneFrameComponent {
   readonly clockText = signal(this.fmt());
   readonly open = signal(false);
   readonly toast = signal<{ text: string } | null>(null);
+  /** Whether the intro splash has played; after that the picker shows directly. */
+  readonly splashSeen = signal(false);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
       setInterval(() => this.clockText.set(this.fmt()), 10000);
     }
+    // Once onboarded, never replay the splash — "페르소나 변경" jumps to the picker.
+    effect(() => {
+      if (this.persona.onboarded()) this.splashSeen.set(true);
+    });
     // Surface a transient toast whenever a note is added.
     effect(() => {
       const n = this.notes.lastAdded();

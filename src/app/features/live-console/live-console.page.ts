@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { PhoneFrameComponent } from '../chat/phone-frame.component';
 import { OntologyLiveViewComponent } from '../ontology/ontology-live-view.component';
 import { ScheduleStore } from '../../state/schedule.store';
@@ -218,10 +217,10 @@ export class LiveConsolePage {
   readonly store = inject(ScheduleStore);
   readonly extract = inject(ExtractService);
   readonly persona = inject(PersonaStore);
-  private readonly router = inject(Router);
 
   changePersona(): void {
-    void this.router.navigateByUrl('/home');
+    // Reopens the persona picker inside the phone simulator.
+    this.persona.resetOnboarding();
   }
 
   seed(): void {
