@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ScheduleStore } from '../../state/schedule.store';
 import { CATEGORY_EMOJI } from '../../domain/types';
+import { QuestFeaturesComponent } from './quest-features.component';
 
 @Component({
   selector: 'app-active-quest-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [QuestFeaturesComponent],
   template: `
     @if (store.activeQuest(); as q) {
       <div class="hero" [attr.data-kind]="q.kind">
@@ -23,6 +25,7 @@ import { CATEGORY_EMOJI } from '../../domain/types';
     } @else {
       <div class="hero empty">🎉 모든 임무 완료! 새 일정을 말해보게.</div>
     }
+    <app-quest-features />
   `,
   styles: [
     `

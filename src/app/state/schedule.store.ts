@@ -93,6 +93,20 @@ export class ScheduleStore {
     return q;
   }
 
+  /** Toggle a single task done/undone (used by the todo & checklist views). */
+  toggleTaskDone(taskId: string): void {
+    const t = this.tasks().find((x) => x.id === taskId);
+    if (!t) return;
+    if (t.status === 'done') {
+      this._graph.update((g) => g.setStatus(taskId, 'pending'));
+      this._xp.update((v) => Math.max(0, v - t.xpReward));
+    } else {
+      this._graph.update((g) => g.setStatus(taskId, 'done'));
+      this._xp.update((v) => v + t.xpReward);
+    }
+    this._tick.update((v) => v + 1);
+  }
+
   cancelLast(): void {
     this._graph.update((g) => g.removeLast());
   }
