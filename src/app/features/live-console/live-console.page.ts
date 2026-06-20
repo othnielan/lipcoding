@@ -3,6 +3,7 @@ import { PhoneFrameComponent } from '../chat/phone-frame.component';
 import { OntologyLiveViewComponent } from '../ontology/ontology-live-view.component';
 import { ScheduleStore } from '../../state/schedule.store';
 import { ExtractService } from '../../services/extract.service';
+import { DemoPlayer } from '../../services/demo-player';
 import { PersonaStore } from '../../state/persona.store';
 import { IconComponent } from '../../shared/icon.component';
 
@@ -44,10 +45,25 @@ import { IconComponent } from '../../shared/icon.component';
           <span class="p-name">{{ persona.selected().name }}</span>
           <app-icon name="more" [size]="14" />
         </button>
-        <button (click)="seed()" [disabled]="extract.busy()"><app-icon name="play" [size]="13" /> 데모 실행</button>
-        <button class="ghost" (click)="store.reset()"><app-icon name="reset" [size]="13" /> 초기화</button>
+        <button (click)="seed()" [disabled]="extract.busy() || demo.running()"><app-icon name="play" [size]="13" /> 데모 실행</button>
+        @if (demo.running()) {
+          <button class="stop" (click)="demo.stop()"><app-icon name="close" [size]="13" /> 중지</button>
+        } @else {
+          <button class="tour" (click)="demo.start()" [disabled]="extract.busy()"><app-icon name="sparkles" [size]="13" /> 데모 플레이</button>
+        }
+        <button class="ghost" (click)="store.reset()" [disabled]="demo.running()"><app-icon name="reset" [size]="13" /> 초기화</button>
       </div>
     </header>
+
+    @if (demo.running()) {
+      <div class="demobar">
+        <span class="spin"></span>
+        <span class="step">데모 진행 {{ demo.stepIndex() }}/{{ demo.total() }}</span>
+        <span class="cap">{{ demo.currentLabel() }}</span>
+        <div class="track"><div class="bar" [style.width.%]="demo.stepIndex() / demo.total() * 100"></div></div>
+        <button class="demobar-stop" (click)="demo.stop()">중지</button>
+      </div>
+    }
 
     <main class="split">
       <section class="left">
@@ -180,8 +196,75 @@ import { IconComponent } from '../../shared/icon.component';
         background: transparent;
         color: var(--ink);
       }
+      .actions .tour {
+        background: #6366f1;
+        color: #fff;
+      }
+      .actions .stop {
+        background: #ef4444;
+        color: #fff;
+      }
       .actions button:disabled {
         opacity: 0.5;
+      }
+      .demobar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 20px;
+        border-bottom: 1px solid var(--line);
+        background: #11131b;
+        flex: 0 0 auto;
+        font-size: 12.5px;
+      }
+      .demobar .spin {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: 2px solid #6366f1;
+        border-top-color: transparent;
+        animation: demospin 0.8s linear infinite;
+        flex: 0 0 auto;
+      }
+      @keyframes demospin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .demobar .step {
+        font-weight: 800;
+        color: #a5b4fc;
+        white-space: nowrap;
+      }
+      .demobar .cap {
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .demobar .track {
+        flex: 1;
+        height: 6px;
+        background: #2a2f3d;
+        border-radius: 999px;
+        overflow: hidden;
+        min-width: 80px;
+      }
+      .demobar .track .bar {
+        height: 100%;
+        background: #6366f1;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+      }
+      .demobar .demobar-stop {
+        border: 1px solid #ef4444;
+        background: transparent;
+        color: #fca5a5;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
       }
       .split {
         flex: 1;
@@ -216,6 +299,7 @@ import { IconComponent } from '../../shared/icon.component';
 export class LiveConsolePage {
   readonly store = inject(ScheduleStore);
   readonly extract = inject(ExtractService);
+  readonly demo = inject(DemoPlayer);
   readonly persona = inject(PersonaStore);
 
   changePersona(): void {

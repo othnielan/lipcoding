@@ -7,8 +7,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { NotesViewComponent } from '../notes/notes-view.component';
 import { WbsViewComponent } from '../wbs/wbs-view.component';
 import { KanbanViewComponent } from '../wbs/kanban-view.component';
-
-type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats' | 'note' | 'wbs' | 'kanban';
+import { FeatureKey, UiStore } from '../../state/ui.store';
 
 interface DayCell {
   day: number | null;
@@ -415,6 +414,7 @@ export class QuestFeaturesComponent {
   readonly store = inject(ScheduleStore);
   readonly notes = inject(NotesStore);
   private readonly clock = inject(CLOCK);
+  private readonly ui = inject(UiStore);
 
   readonly features: { key: FeatureKey; icon: string; label: string }[] = [
     { key: 'todo', icon: 'todo', label: '투두' },
@@ -428,7 +428,7 @@ export class QuestFeaturesComponent {
   ];
   readonly monthHeaders = MONTH_LABEL;
 
-  readonly active = signal<FeatureKey | null>(null);
+  readonly active = this.ui.activeFeature;
   readonly activeFeature = computed(() => this.features.find((f) => f.key === this.active()) ?? null);
   readonly selectedDay = signal<string | null>(null);
 
@@ -496,13 +496,13 @@ export class QuestFeaturesComponent {
   }
 
   toggle(key: FeatureKey): void {
-    this.active.update((v) => (v === key ? null : key));
+    this.ui.toggleFeature(key);
     if (this.active() === 'month' && !this.selectedDay()) {
       this.selectedDay.set(this.dateKey(this.clock.now()));
     }
   }
   close(): void {
-    this.active.set(null);
+    this.ui.closeFeature();
   }
   selectDay(key: string): void {
     this.selectedDay.set(key);

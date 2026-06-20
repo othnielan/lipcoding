@@ -7,6 +7,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
 import { PersonaStore } from '../../state/persona.store';
 import { ScheduleStore } from '../../state/schedule.store';
+import { UiStore } from '../../state/ui.store';
 import { PhoneSplashComponent } from '../onboarding/phone-splash.component';
 import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
 
@@ -28,7 +29,7 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
         <span class="right">5G &nbsp;<span class="batt">▮▮▮</span></span>
       </div>
       <div class="appbar">
-        @if (splashDone() && persona.onboarded()) {
+        @if (ui.splashDone() && persona.onboarded()) {
           <button class="back" (click)="goHome()" aria-label="홈으로">
             <app-icon name="back" [size]="20" />
           </button>
@@ -89,8 +90,8 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
             </button>
           </div>
         }
-        @if (!splashDone()) {
-          <app-phone-splash (done)="splashDone.set(true)" />
+        @if (!ui.splashDone()) {
+          <app-phone-splash (done)="ui.markSplashDone()" />
         } @else if (!persona.onboarded()) {
           <app-persona-picker />
         }
@@ -489,12 +490,11 @@ export class PhoneFrameComponent {
   readonly notes = inject(NotesStore);
   readonly persona = inject(PersonaStore);
   readonly schedule = inject(ScheduleStore);
+  readonly ui = inject(UiStore);
   readonly clockText = signal(this.fmt());
   readonly open = signal(false);
   readonly menuOpen = signal(false);
   readonly toast = signal<{ icon: string; title: string; text: string } | null>(null);
-  /** Session-only: the intro splash replays on every page load (router refresh). */
-  readonly splashDone = signal(false);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
