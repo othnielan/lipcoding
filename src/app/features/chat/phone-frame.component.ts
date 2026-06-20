@@ -6,6 +6,7 @@ import { NotesStore } from '../../state/notes.store';
 import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
 import { PersonaStore } from '../../state/persona.store';
+import { ScheduleStore } from '../../state/schedule.store';
 import { PhoneSplashComponent } from '../onboarding/phone-splash.component';
 import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
 
@@ -27,7 +28,13 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
         <span class="right">5G &nbsp;<span class="batt">▮▮▮</span></span>
       </div>
       <div class="appbar">
-        <span class="back"><app-icon name="back" [size]="20" /></span>
+        @if (splashDone() && persona.onboarded()) {
+          <button class="back" (click)="goHome()" aria-label="홈으로">
+            <app-icon name="back" [size]="20" />
+          </button>
+        } @else {
+          <span class="back"></span>
+        }
         <span class="name"><app-icon [name]="persona.selected().icon" [size]="16" /> {{ persona.selected().name }}</span>
         <div class="actions">
           <button
@@ -41,23 +48,57 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
               <span class="badge">{{ sub.unreadCount() }}</span>
             }
           </button>
-          <span class="more"><app-icon name="more" [size]="18" /></span>
+          <button class="more" (click)="toggleMenu()" aria-label="더 보기">
+            <app-icon name="more" [size]="18" />
+          </button>
         </div>
       </div>
       <div class="screen">
         <app-chat-panel />
-        @if (!persona.onboarded()) {
-          @if (splashSeen()) {
-            <app-persona-picker />
-          } @else {
-            <app-phone-splash (done)="splashSeen.set(true)" />
-          }
+        @if (menuOpen()) {
+          <button class="menu-scrim" (click)="closeMenu()" aria-label="메뉴 닫기"></button>
+          <div class="menu" role="menu">
+            <div class="menu-head">
+              <span class="m-ic" [style.background]="persona.selected().gradient">
+                <app-icon [name]="persona.selected().icon" [size]="18" />
+              </span>
+              <div class="m-id">
+                <span class="m-name">{{ persona.selected().name }}</span>
+                <span class="m-role">{{ persona.selected().role }}</span>
+              </div>
+            </div>
+            <button class="menu-item" (click)="menuChangePersona()" role="menuitem">
+              <app-icon name="sparkles" [size]="17" />
+              <span>페르소나 변경</span>
+            </button>
+            <button class="menu-item" (click)="menuOpenNotifications()" role="menuitem">
+              <app-icon name="bell" [size]="17" />
+              <span>친구 일정 구독</span>
+              @if (sub.unreadCount() > 0) {
+                <span class="m-badge">{{ sub.unreadCount() }}</span>
+              }
+            </button>
+            <button class="menu-item" (click)="menuShowInfo()" role="menuitem">
+              <app-icon name="info" [size]="17" />
+              <span>앱 정보</span>
+            </button>
+            <div class="menu-sep"></div>
+            <button class="menu-item danger" (click)="menuReset()" role="menuitem">
+              <app-icon name="trash" [size]="17" />
+              <span>대화 초기화</span>
+            </button>
+          </div>
+        }
+        @if (!splashDone()) {
+          <app-phone-splash (done)="splashDone.set(true)" />
+        } @else if (!persona.onboarded()) {
+          <app-persona-picker />
         }
         @if (toast(); as t) {
           <div class="toast">
-            <span class="t-ic"><app-icon name="note" [size]="16" /></span>
+            <span class="t-ic"><app-icon [name]="t.icon" [size]="16" /></span>
             <div class="t-body">
-              <span class="t-ttl">노트에 저장됨</span>
+              <span class="t-ttl">{{ t.title }}</span>
               <span class="t-tx">{{ t.text }}</span>
             </div>
           </div>
@@ -138,6 +179,30 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
         color: #1f2430;
         font-size: 18px;
         display: inline-flex;
+        align-items: center;
+      }
+      button.back {
+        border: none;
+        background: transparent;
+        padding: 2px;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      button.back:hover {
+        background: #eceff5;
+      }
+      button.more {
+        border: none;
+        background: transparent;
+        color: #1f2430;
+        padding: 2px;
+        cursor: pointer;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+      }
+      button.more:hover {
+        background: #eceff5;
       }
       .name {
         font-size: 14px;
@@ -259,6 +324,114 @@ import { PersonaPickerComponent } from '../onboarding/persona-picker.component';
         border-radius: 3px;
         background: #20242c;
       }
+      .menu-scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        border: none;
+        background: rgba(15, 18, 26, 0.18);
+        cursor: default;
+      }
+      .menu {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        z-index: 9;
+        width: 224px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow:
+          0 18px 40px rgba(0, 0, 0, 0.22),
+          0 0 0 1px rgba(0, 0, 0, 0.05);
+        padding: 7px;
+        animation: menuIn 0.16s ease-out;
+        transform-origin: top right;
+      }
+      @keyframes menuIn {
+        from {
+          opacity: 0;
+          transform: scale(0.92) translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .menu-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 9px 10px;
+      }
+      .menu-head .m-ic {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        flex: none;
+      }
+      .menu-head .m-id {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+        min-width: 0;
+      }
+      .menu-head .m-name {
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #1f2430;
+      }
+      .menu-head .m-role {
+        font-size: 11px;
+        color: #71778a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .menu-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 9px;
+        border: none;
+        background: transparent;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #2a2f3a;
+        text-align: left;
+      }
+      .menu-item:hover {
+        background: #f0f2f7;
+      }
+      .menu-item .m-badge {
+        margin-left: auto;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: #ff4d4f;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+      }
+      .menu-item.danger {
+        color: #d6373b;
+      }
+      .menu-item.danger:hover {
+        background: #fdecec;
+      }
+      .menu-sep {
+        height: 1px;
+        background: #eceef3;
+        margin: 5px 8px;
+      }
       .toast {
         position: absolute;
         top: 12px;
@@ -315,35 +488,72 @@ export class PhoneFrameComponent {
   readonly sub = inject(SubscriptionStore);
   readonly notes = inject(NotesStore);
   readonly persona = inject(PersonaStore);
+  readonly schedule = inject(ScheduleStore);
   readonly clockText = signal(this.fmt());
   readonly open = signal(false);
-  readonly toast = signal<{ text: string } | null>(null);
-  /** Whether the intro splash has played; after that the picker shows directly. */
-  readonly splashSeen = signal(false);
+  readonly menuOpen = signal(false);
+  readonly toast = signal<{ icon: string; title: string; text: string } | null>(null);
+  /** Session-only: the intro splash replays on every page load (router refresh). */
+  readonly splashDone = signal(false);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
       setInterval(() => this.clockText.set(this.fmt()), 10000);
     }
-    // Once onboarded, never replay the splash — "페르소나 변경" jumps to the picker.
-    effect(() => {
-      if (this.persona.onboarded()) this.splashSeen.set(true);
-    });
     // Surface a transient toast whenever a note is added.
     effect(() => {
       const n = this.notes.lastAdded();
       if (!n) return;
       if (typeof window === 'undefined') return;
-      this.toast.set({ text: n.text });
-      if (this.toastTimer) clearTimeout(this.toastTimer);
-      this.toastTimer = setTimeout(() => this.toast.set(null), 3000);
+      this.showToast('note', '노트에 저장됨', n.text);
     });
   }
 
   toggle(): void {
     this.open.update((v) => !v);
     if (this.open()) this.sub.markAllRead();
+  }
+
+  toggleMenu(): void {
+    this.menuOpen.update((v) => !v);
+  }
+
+  closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  menuChangePersona(): void {
+    this.closeMenu();
+    this.persona.resetOnboarding();
+  }
+
+  menuOpenNotifications(): void {
+    this.closeMenu();
+    if (!this.open()) this.toggle();
+  }
+
+  menuShowInfo(): void {
+    this.closeMenu();
+    this.showToast('info', 'AI 스케줄러 · v1.0', `현재 파트너: ${this.persona.selected().name}`);
+  }
+
+  menuReset(): void {
+    this.closeMenu();
+    this.schedule.reset();
+    this.showToast('trash', '대화 초기화됨', '일정과 경험치를 처음 상태로 되돌렸어요.');
+  }
+
+  /** Header back: return to the persona picker (home). Splash stays played. */
+  goHome(): void {
+    this.persona.resetOnboarding();
+  }
+
+  private showToast(icon: string, title: string, text: string): void {
+    if (typeof window === 'undefined') return;
+    this.toast.set({ icon, title, text });
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toast.set(null), 3000);
   }
 
   private fmt(): string {

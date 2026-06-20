@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { AdminLogStore } from '../../state/admin-log.store';
 import { SdkExchange } from '../../domain/types';
 import { IconComponent } from '../../shared/icon.component';
+import { ExtractService } from '../../services/extract.service';
 
 type Tab = 'request' | 'response';
 
@@ -24,6 +25,14 @@ type Tab = 'request' | 'response';
           </span>
         }
       </div>
+
+      @if (extract.busy()) {
+        <div class="progress">
+          <app-icon name="loader" [size]="13" class="p-spin" />
+          <span class="p-tx">SDK 요청 처리 중…</span>
+          <span class="bar"><i></i></span>
+        </div>
+      }
 
       @if (sdk(); as s) {
         <div class="meta">
@@ -101,6 +110,53 @@ type Tab = 'request' | 'response';
         justify-content: space-between;
         align-items: center;
         margin-bottom: 9px;
+      }
+      .progress {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 9px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #a5b4fc;
+      }
+      .progress .p-spin {
+        animation: sdkSpin 0.8s linear infinite;
+        flex: none;
+      }
+      .progress .p-tx {
+        white-space: nowrap;
+      }
+      .progress .bar {
+        position: relative;
+        flex: 1;
+        height: 4px;
+        border-radius: 3px;
+        background: rgba(139, 92, 246, 0.18);
+        overflow: hidden;
+      }
+      .progress .bar i {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 40%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #6366f1, #22d3ee);
+        animation: sdkScan 1.1s ease-in-out infinite;
+      }
+      @keyframes sdkSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes sdkScan {
+        0% {
+          left: -42%;
+        }
+        100% {
+          left: 102%;
+        }
       }
       .ttl {
         font-weight: 700;
@@ -239,6 +295,7 @@ type Tab = 'request' | 'response';
 })
 export class SdkConsoleComponent {
   private readonly admin = inject(AdminLogStore);
+  readonly extract = inject(ExtractService);
   readonly tab = signal<Tab>('response');
   readonly copied = signal(false);
 

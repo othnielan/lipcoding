@@ -23,8 +23,12 @@ import { IconComponent } from '../../shared/icon.component';
         [placeholder]="placeholder()"
         [disabled]="extract.busy()"
       />
-      <button class="send" (click)="send()" [disabled]="extract.busy() || !draft().trim()">
-        <app-icon name="send" [size]="16" />
+      <button class="send" [class.busy]="extract.busy()" (click)="send()" [disabled]="extract.busy() || !draft().trim()">
+        @if (extract.busy()) {
+          <app-icon name="loader" [size]="16" class="spin" />
+        } @else {
+          <app-icon name="send" [size]="16" />
+        }
       </button>
       <button
         class="mic"
@@ -78,6 +82,17 @@ import { IconComponent } from '../../shared/icon.component';
       }
       .send:disabled {
         opacity: 0.4;
+      }
+      .send.busy:disabled {
+        opacity: 1;
+      }
+      .spin {
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
       .mic {
         background: #efe6cf;

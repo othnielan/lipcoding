@@ -248,6 +248,18 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         @case ('folder') {
           <path d="M4 5a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
         }
+        @case ('info') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v5" />
+          <path d="M12 8h.01" />
+        }
+        @case ('user') {
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 20a7 7 0 0 1 14 0" />
+        }
+        @case ('loader') {
+          <path d="M12 3a9 9 0 1 0 9 9" />
+        }
         @default {
           <circle cx="12" cy="12" r="9" />
         }

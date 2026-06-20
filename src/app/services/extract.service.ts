@@ -107,6 +107,13 @@ export class ExtractService {
     } catch {
       this.store.appendNpc(personaSpeak(this.persona.selected(), { kind: 'error' }));
     } finally {
+      // Keep the progress indicator on screen long enough to be felt, even when
+      // the local heuristic parser returns almost instantly.
+      const shown = performance.now() - started;
+      const MIN_BUSY_MS = 750;
+      if (shown < MIN_BUSY_MS) {
+        await new Promise((r) => setTimeout(r, MIN_BUSY_MS - shown));
+      }
       this.busy.set(false);
     }
   }
