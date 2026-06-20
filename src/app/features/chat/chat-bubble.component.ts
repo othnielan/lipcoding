@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { ChatMessage, TaskDraft } from '../../domain/types';
 import { IconComponent } from '../../shared/icon.component';
+import { PersonaStore } from '../../state/persona.store';
 
 const INTENT_LABEL: Record<string, string> = {
   add_schedule: '일정 추가',
@@ -70,7 +71,7 @@ const INTENT_LABEL: Record<string, string> = {
     } @else {
       <div class="row" [class.user]="msg().role === 'user'" [class.system]="msg().role === 'system'">
         @if (msg().role === 'npc') {
-          <div class="avatar"><app-icon name="wizard" [size]="18" /></div>
+          <div class="avatar"><app-icon [name]="personaIcon()" [size]="18" /></div>
         }
         <div class="bubble">
           <p>{{ msg().text }}</p>
@@ -86,9 +87,36 @@ const INTENT_LABEL: Record<string, string> = {
         gap: 8px;
         margin: 8px 0;
         align-items: flex-end;
+        animation: rowIn 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      @keyframes rowIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .row {
+          animation: none;
+        }
       }
       .row.user {
         flex-direction: row-reverse;
+        animation-name: rowInUser;
+      }
+      @keyframes rowInUser {
+        from {
+          opacity: 0;
+          transform: translateY(12px) translateX(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
       .avatar {
         width: 28px;
@@ -477,8 +505,10 @@ const INTENT_LABEL: Record<string, string> = {
   ],
 })
 export class ChatBubbleComponent {
+  private readonly persona = inject(PersonaStore);
   readonly msg = input.required<ChatMessage>();
   readonly card = computed(() => this.msg().extract ?? null);
+  readonly personaIcon = computed(() => this.persona.selected().icon);
   readonly intentLabel = computed(() => {
     const c = this.card();
     return c ? (INTENT_LABEL[c.intent] ?? c.intent) : '';

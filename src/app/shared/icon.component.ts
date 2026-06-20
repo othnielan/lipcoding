@@ -219,6 +219,19 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
           <path d="M11.5 7h1.5" />
           <path d="M17.5 7h1.5" />
         }
+        @case ('heart') {
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+        }
+        @case ('briefcase') {
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+          <path d="M2 13h20" />
+        }
+        @case ('sparkles') {
+          <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8Z" />
+          <path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9Z" />
+          <path d="M5 4l.6 1.4L7 6l-1.4.6L5 8l-.6-1.4L3 6l1.4-.6Z" />
+        }
         @case ('chevron-left') {
           <path d="m15 18-6-6 6-6" />
         }

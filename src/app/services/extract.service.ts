@@ -4,6 +4,8 @@ import { CLOCK } from '../ports/clock.port';
 import { ScheduleStore } from '../state/schedule.store';
 import { NotesStore } from '../state/notes.store';
 import { AdminLogStore } from '../state/admin-log.store';
+import { PersonaStore } from '../state/persona.store';
+import { personaSpeak } from '../domain/persona';
 import { newId } from '../domain/id';
 
 /** Orchestrates: utterance -> extractor -> store + admin log. */
@@ -14,6 +16,7 @@ export class ExtractService {
   private readonly store = inject(ScheduleStore);
   private readonly notes = inject(NotesStore);
   private readonly admin = inject(AdminLogStore);
+  private readonly persona = inject(PersonaStore);
 
   readonly busy = signal(false);
 
@@ -42,38 +45,53 @@ export class ExtractService {
         tasks: result.tasks,
       });
 
-      // 2) Then reflect them into the ontology / quest board.
+      // 2) Then reflect them into the ontology / quest board, narrating each
+      //    outcome in the selected persona's voice.
+      const persona = this.persona.selected();
+      let narration = result.npcReply;
+
       switch (result.intent) {
         case 'add_schedule':
           this.store.ingestDrafts(result.tasks);
+          narration = personaSpeak(
+            persona,
+            result.tasks.length ? { kind: 'add', count: result.tasks.length } : { kind: 'addEmpty' },
+          );
           break;
         case 'complete_quest': {
           const q = this.store.completeActive();
-          if (q) this.store.appendSystem(`⚔️ "${q.title}" 클리어!`);
+          narration = q
+            ? personaSpeak(persona, { kind: 'complete', title: q.title })
+            : personaSpeak(persona, { kind: 'next' });
           break;
         }
         case 'skip_quest':
           this.store.skipActive();
+          narration = personaSpeak(persona, { kind: 'skip' });
           break;
         case 'cancel':
           this.store.cancelLast();
+          narration = personaSpeak(persona, { kind: 'cancel' });
           break;
         case 'next_quest':
           this.store.refreshActive();
+          narration = personaSpeak(persona, { kind: 'next' });
           break;
         case 'query':
+          narration = personaSpeak(persona, { kind: 'query' });
+          break;
+        case 'chat':
+          // Non-schedule small talk is kept as a note so nothing said is lost.
+          this.notes.add(text, 'auto');
+          this.store.appendSystem(personaSpeak(persona, { kind: 'noteSaved' }));
+          narration = personaSpeak(persona, { kind: 'chat' });
+          break;
         default:
           break;
       }
 
-      // Non-schedule small talk is kept as a note so nothing said is lost.
-      if (result.intent === 'chat') {
-        this.notes.add(text, 'auto');
-        this.store.appendSystem('일정이 아니라서 노트에 저장했네.');
-      }
-
-      // 3) Finally the NPC narration.
-      this.store.appendNpc(result.npcReply);
+      // 3) Finally the NPC narration, in the persona's voice.
+      this.store.appendNpc(narration);
       this.admin.push({
         id: newId('log'),
         ts: new Date().toISOString(),
@@ -87,7 +105,7 @@ export class ExtractService {
         sdk,
       });
     } catch {
-      this.store.appendNpc('잠시 문제가 생겼다네. 조금만 더 또렷이 말해주겠나?');
+      this.store.appendNpc(personaSpeak(this.persona.selected(), { kind: 'error' }));
     } finally {
       this.busy.set(false);
     }

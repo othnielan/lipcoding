@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { PhoneFrameComponent } from '../chat/phone-frame.component';
 import { OntologyLiveViewComponent } from '../ontology/ontology-live-view.component';
 import { ScheduleStore } from '../../state/schedule.store';
 import { ExtractService } from '../../services/extract.service';
+import { PersonaStore } from '../../state/persona.store';
 import { IconComponent } from '../../shared/icon.component';
 
 @Component({
@@ -31,6 +33,18 @@ import { IconComponent } from '../../shared/icon.component';
       </div>
 
       <div class="actions">
+        <button
+          class="persona"
+          [style.--accent]="persona.selected().accent"
+          (click)="changePersona()"
+          title="페르소나 변경"
+        >
+          <span class="p-ic" [style.background]="persona.selected().gradient">
+            <app-icon [name]="persona.selected().icon" [size]="14" />
+          </span>
+          <span class="p-name">{{ persona.selected().name }}</span>
+          <app-icon name="more" [size]="14" />
+        </button>
         <button (click)="seed()" [disabled]="extract.busy()"><app-icon name="play" [size]="13" /> 데모 실행</button>
         <button class="ghost" (click)="store.reset()"><app-icon name="reset" [size]="13" /> 초기화</button>
       </div>
@@ -126,6 +140,30 @@ import { IconComponent } from '../../shared/icon.component';
         gap: 8px;
         flex: 0 0 auto;
       }
+      .actions .persona {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--accent);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 5px 10px 5px 6px;
+        font-size: 12.5px;
+        font-weight: 700;
+      }
+      .actions .persona .p-ic {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        flex: 0 0 auto;
+      }
+      .actions .persona .p-name {
+        white-space: nowrap;
+      }
       .actions button {
         border: 1px solid var(--line);
         background: #f59e0b;
@@ -179,6 +217,12 @@ import { IconComponent } from '../../shared/icon.component';
 export class LiveConsolePage {
   readonly store = inject(ScheduleStore);
   readonly extract = inject(ExtractService);
+  readonly persona = inject(PersonaStore);
+  private readonly router = inject(Router);
+
+  changePersona(): void {
+    void this.router.navigateByUrl('/home');
+  }
 
   seed(): void {
     void this.extract.submit(

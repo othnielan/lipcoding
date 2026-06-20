@@ -5,6 +5,7 @@ import { SubscriptionStore } from '../../state/subscription.store';
 import { NotesStore } from '../../state/notes.store';
 import { IconComponent } from '../../shared/icon.component';
 import { CLOCK } from '../../ports/clock.port';
+import { PersonaStore } from '../../state/persona.store';
 
 @Component({
   selector: 'app-phone-frame',
@@ -19,7 +20,7 @@ import { CLOCK } from '../../ports/clock.port';
       </div>
       <div class="appbar">
         <span class="back"><app-icon name="back" [size]="20" /></span>
-        <span class="name"><app-icon name="wizard" [size]="16" /> QuestMaster</span>
+        <span class="name"><app-icon [name]="persona.selected().icon" [size]="16" /> {{ persona.selected().name }}</span>
         <div class="actions">
           <button
             class="bell"
@@ -298,6 +299,7 @@ export class PhoneFrameComponent {
   private readonly clock = inject(CLOCK);
   readonly sub = inject(SubscriptionStore);
   readonly notes = inject(NotesStore);
+  readonly persona = inject(PersonaStore);
   readonly clockText = signal(this.fmt());
   readonly open = signal(false);
   readonly toast = signal<{ text: string } | null>(null);
