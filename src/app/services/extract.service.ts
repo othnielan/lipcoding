@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { LLM_EXTRACTOR } from '../ports/llm-extractor.port';
 import { CLOCK } from '../ports/clock.port';
 import { ScheduleStore } from '../state/schedule.store';
+import { NotesStore } from '../state/notes.store';
 import { AdminLogStore } from '../state/admin-log.store';
 import { newId } from '../domain/id';
 
@@ -11,6 +12,7 @@ export class ExtractService {
   private readonly llm = inject(LLM_EXTRACTOR);
   private readonly clock = inject(CLOCK);
   private readonly store = inject(ScheduleStore);
+  private readonly notes = inject(NotesStore);
   private readonly admin = inject(AdminLogStore);
 
   readonly busy = signal(false);
@@ -62,6 +64,11 @@ export class ExtractService {
         case 'query':
         default:
           break;
+      }
+
+      // Non-schedule small talk is kept as a note so nothing said is lost.
+      if (result.intent === 'chat') {
+        this.notes.add(text, 'auto');
       }
 
       // 3) Finally the NPC narration.

@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ScheduleStore } from '../../state/schedule.store';
+import { NotesStore } from '../../state/notes.store';
 import { CLOCK } from '../../ports/clock.port';
 import { CategoryName, Task } from '../../domain/types';
 import { IconComponent } from '../../shared/icon.component';
+import { NotesViewComponent } from '../notes/notes-view.component';
 
-type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats';
+type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats' | 'note';
 
 interface DayCell {
   day: number | null;
@@ -31,7 +33,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
 @Component({
   selector: 'app-quest-features',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconComponent],
+  imports: [IconComponent, NotesViewComponent],
   template: `
     <div class="bar">
       @for (f of features; track f.key) {
@@ -40,6 +42,9 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
           <span class="lb">{{ f.label }}</span>
           @if (f.key === 'todo' && todoTasks().length) {
             <span class="cnt">{{ todoTasks().length }}</span>
+          }
+          @if (f.key === 'note' && notes.count()) {
+            <span class="cnt">{{ notes.count() }}</span>
           }
         </button>
       }
@@ -177,6 +182,10 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
                   <span class="pri side"><app-icon name="sword" [size]="13" /> 사이드 {{ sideCount() }}</span>
                 </div>
               </div>
+            }
+
+            @case ('note') {
+              <app-notes-view />
             }
           }
         </div>
@@ -394,6 +403,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
 })
 export class QuestFeaturesComponent {
   readonly store = inject(ScheduleStore);
+  readonly notes = inject(NotesStore);
   private readonly clock = inject(CLOCK);
 
   readonly features: { key: FeatureKey; icon: string; label: string }[] = [
@@ -402,6 +412,7 @@ export class QuestFeaturesComponent {
     { key: 'week', icon: 'week', label: '주간' },
     { key: 'month', icon: 'month', label: '월간' },
     { key: 'stats', icon: 'stats', label: '통계' },
+    { key: 'note', icon: 'note', label: '노트' },
   ];
   readonly monthHeaders = MONTH_LABEL;
 
