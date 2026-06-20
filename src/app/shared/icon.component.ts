@@ -205,6 +205,36 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
           <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
         }
+        @case ('wbs') {
+          <rect x="3" y="3" width="6" height="6" rx="1" />
+          <rect x="15" y="15" width="6" height="6" rx="1" />
+          <path d="M6 9v3a3 3 0 0 0 3 3h3" />
+          <path d="M18 6h-3a3 3 0 0 0-3 3v6" />
+        }
+        @case ('kanban') {
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M9 3v18" />
+          <path d="M15 3v18" />
+          <path d="M5.5 7h1.5" />
+          <path d="M11.5 7h1.5" />
+          <path d="M17.5 7h1.5" />
+        }
+        @case ('chevron-left') {
+          <path d="m15 18-6-6 6-6" />
+        }
+        @case ('plus') {
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        }
+        @case ('chevron-down') {
+          <path d="m6 9 6 6 6-6" />
+        }
+        @case ('chevron-right') {
+          <path d="m9 6 6 6-6 6" />
+        }
+        @case ('folder') {
+          <path d="M4 5a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+        }
         @default {
           <circle cx="12" cy="12" r="9" />
         }

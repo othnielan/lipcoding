@@ -5,8 +5,10 @@ import { CLOCK } from '../../ports/clock.port';
 import { CategoryName, Task } from '../../domain/types';
 import { IconComponent } from '../../shared/icon.component';
 import { NotesViewComponent } from '../notes/notes-view.component';
+import { WbsViewComponent } from '../wbs/wbs-view.component';
+import { KanbanViewComponent } from '../wbs/kanban-view.component';
 
-type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats' | 'note';
+type FeatureKey = 'todo' | 'check' | 'week' | 'month' | 'stats' | 'note' | 'wbs' | 'kanban';
 
 interface DayCell {
   day: number | null;
@@ -33,7 +35,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
 @Component({
   selector: 'app-quest-features',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconComponent, NotesViewComponent],
+  imports: [IconComponent, NotesViewComponent, WbsViewComponent, KanbanViewComponent],
   template: `
     <div class="bar">
       @for (f of features; track f.key) {
@@ -186,6 +188,14 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
 
             @case ('note') {
               <app-notes-view />
+            }
+
+            @case ('wbs') {
+              <app-wbs-view />
+            }
+
+            @case ('kanban') {
+              <app-kanban-view />
             }
           }
         </div>
@@ -420,6 +430,8 @@ export class QuestFeaturesComponent {
     { key: 'month', icon: 'month', label: '월간' },
     { key: 'stats', icon: 'stats', label: '통계' },
     { key: 'note', icon: 'note', label: '노트' },
+    { key: 'wbs', icon: 'wbs', label: 'WBS' },
+    { key: 'kanban', icon: 'kanban', label: '칸반' },
   ];
   readonly monthHeaders = MONTH_LABEL;
 
