@@ -8,6 +8,14 @@ import express from 'express';
 import { join } from 'node:path';
 import { parseRequest, runExtract } from './server/extract';
 
+// Load .env (LLM credentials) when present. Native Node loader, no dependency.
+// Safe to ignore in environments without a .env file (e.g. production prerender).
+try {
+  (process as NodeJS.Process & { loadEnvFile?: (p?: string) => void }).loadEnvFile?.();
+} catch {
+  /* no .env file — fall back to heuristic extractor */
+}
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
