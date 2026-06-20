@@ -340,7 +340,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
       .empty.sm { padding: 8px 0; }
       .prog { margin-bottom: 11px; }
       .pbar { height: 8px; background: #e6e9ef; border-radius: 999px; overflow: hidden; }
-      .pbar span { display: block; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); transition: width 0.4s; }
+      .pbar span { display: block; height: 100%; background: #10b981; transition: width 0.4s; }
       .ptxt { font-size: 11.5px; color: #525a6b; display: block; margin-top: 5px; }
       .week { display: flex; flex-direction: column; gap: 6px; }
       .wday { background: #fff; border: 1px solid #e6e9ef; border-radius: 9px; padding: 7px 9px; }
@@ -398,7 +398,7 @@ const MONTH_LABEL = WK; // reuse weekday headers for the month grid
       .srow { display: flex; align-items: center; gap: 8px; }
       .sl { flex: 0 0 84px; font-size: 12px; color: #2a3140; }
       .sbar { flex: 1; height: 7px; background: #e6e9ef; border-radius: 999px; overflow: hidden; }
-      .sbar span { display: block; height: 100%; background: linear-gradient(90deg, #2f6df6, #60a5fa); }
+      .sbar span { display: block; height: 100%; background: #2f6df6; }
       .sv { font-size: 11.5px; color: #525a6b; width: 18px; text-align: right; }
       .pri-row { display: flex; gap: 8px; }
       .pri { flex: 1; text-align: center; font-size: 12px; font-weight: 700; border-radius: 9px; padding: 8px; }

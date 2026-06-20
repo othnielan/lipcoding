@@ -84,14 +84,8 @@ type Tab = 'request' | 'response';
         overflow: hidden;
       }
       .panel.live {
-        border: 1.5px solid transparent;
-        background:
-          linear-gradient(var(--panel), var(--panel)) padding-box,
-          linear-gradient(120deg, #6366f1, #8b5cf6, #22d3ee, #6366f1) border-box;
-        background-size:
-          100% 100%,
-          300% 300%;
-        animation: flow 6s linear infinite;
+        border: 1.5px solid #6366f1;
+        background: var(--panel);
       }
       @keyframes flow {
         0% {
@@ -142,7 +136,7 @@ type Tab = 'request' | 'response';
         height: 100%;
         width: 40%;
         border-radius: 3px;
-        background: linear-gradient(90deg, #6366f1, #22d3ee);
+        background: #6366f1;
         animation: sdkScan 1.1s ease-in-out infinite;
       }
       @keyframes sdkSpin {
@@ -175,9 +169,8 @@ type Tab = 'request' | 'response';
         color: #e2e8f0;
       }
       .tag.copilot {
-        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        background: #6366f1;
         color: #fff;
-        box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
       }
       .meta {
         display: flex;
@@ -252,7 +245,7 @@ type Tab = 'request' | 'response';
       }
       .tab.on {
         color: #fff;
-        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        background: #4f46e5;
         border-color: transparent;
       }
       .copy {

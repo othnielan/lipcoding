@@ -44,7 +44,7 @@ import { IconComponent } from '../../shared/icon.component';
         height: 100%;
         display: grid;
         place-items: center;
-        background: radial-gradient(420px 360px at 50% 32%, #1d2335 0%, #0c0e15 62%);
+        background: #0c0e15;
         overflow: hidden;
         animation: fade 0.3s ease both;
       }
@@ -61,9 +61,9 @@ import { IconComponent } from '../../shared/icon.component';
         width: 320px;
         height: 320px;
         border-radius: 50%;
-        background: conic-gradient(from 0deg, #6366f1, #8b5cf6, #ec4899, #22d3ee, #6366f1);
+        background: #6366f1;
         filter: blur(60px);
-        opacity: 0.35;
+        opacity: 0.22;
         animation: spin 14s linear infinite;
       }
       @keyframes spin {
@@ -157,7 +157,7 @@ import { IconComponent } from '../../shared/icon.component';
         height: 100%;
         width: 40%;
         border-radius: 999px;
-        background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+        background: #8b5cf6;
         animation: slide 1.6s ease-in-out infinite;
       }
       @keyframes slide {

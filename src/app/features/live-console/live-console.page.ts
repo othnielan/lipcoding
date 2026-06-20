@@ -123,7 +123,7 @@ import { IconComponent } from '../../shared/icon.component';
       }
       .fill {
         height: 100%;
-        background: linear-gradient(90deg, #f59e0b, #fcd34d);
+        background: #f59e0b;
         transition: width 0.6s ease;
       }
       .xptext {

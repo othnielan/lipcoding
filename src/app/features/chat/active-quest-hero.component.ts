@@ -33,19 +33,19 @@ import { IconComponent } from '../../shared/icon.component';
       .hero {
         border-radius: 14px;
         padding: 10px 12px;
-        background: linear-gradient(135deg, #fff7e6, #ffe9bf);
+        background: #fff4e0;
         border: 1px solid #f5c971;
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
         color: #4a3a09;
       }
       .hero[data-kind='sub'] {
-        background: linear-gradient(135deg, #eaf1ff, #cfe0ff);
+        background: #e3edff;
         border-color: #93b4fb;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
         color: #14306e;
       }
       .hero[data-kind='side'] {
-        background: linear-gradient(135deg, #e7fbf0, #c8f3dd);
+        background: #e0f7ec;
         border-color: #7fd9ad;
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
         color: #0c5238;

@@ -64,7 +64,7 @@ import { IconComponent } from '../../shared/icon.component';
         z-index: 4;
         display: flex;
         flex-direction: column;
-        background: radial-gradient(420px 360px at 50% 0%, #1b2030 0%, #0c0e15 70%);
+        background: #0c0e15;
         animation: fade 0.3s ease both;
       }
       @keyframes fade {

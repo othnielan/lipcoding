@@ -89,7 +89,7 @@ import { IconComponent } from '../../shared/icon.component';
       .kl { font-size: 12px; color: #525a6b; font-weight: 700; }
       .kv { font-size: 15px; color: #1f2430; }
       .kbar { height: 8px; background: #e6e9ef; border-radius: 999px; overflow: hidden; margin: 6px 0 11px; }
-      .kbar span { display: block; height: 100%; background: linear-gradient(90deg, #2f6df6, #60a5fa); transition: width 0.3s ease; }
+      .kbar span { display: block; height: 100%; background: #2f6df6; transition: width 0.3s ease; }
       .board { display: flex; flex-direction: column; gap: 10px; }
       .col {
         background: #eef1f6;

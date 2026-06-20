@@ -141,7 +141,7 @@ const INTENT_LABEL: Record<string, string> = {
         color: #fff;
       }
       .row.system .bubble {
-        background: linear-gradient(90deg, #fde68a, #fbbf24);
+        background: #fcd34d;
         color: #4a3a09;
         font-weight: 700;
         text-align: center;
@@ -167,8 +167,7 @@ const INTENT_LABEL: Record<string, string> = {
 
       /* --- AI Extraction card --- */
       .avatar.ai.glow {
-        background: radial-gradient(circle at 30% 30%, #818cf8, #6366f1 60%, #4338ca);
-        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.35), 0 0 14px rgba(139, 92, 246, 0.6);
+        background: #6366f1;
         animation: avatarFloat 3s ease-in-out infinite;
       }
       @keyframes avatarFloat {
@@ -191,20 +190,12 @@ const INTENT_LABEL: Record<string, string> = {
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
       }
-      /* Animated gradient border + breathing glow for real SDK output */
+      /* Flat border for real SDK output */
       .card.copilot-card {
-        border: 1.5px solid transparent;
+        border: 1.5px solid #6366f1;
         border-radius: 16px;
-        background:
-          linear-gradient(#0b1220, #0b1220) padding-box,
-          linear-gradient(120deg, #6366f1, #8b5cf6, #ec4899, #22d3ee, #6366f1) border-box;
-        background-size:
-          100% 100%,
-          300% 300%;
-        animation:
-          cardIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both,
-          borderFlow 6s linear infinite,
-          glowPulse 2.8s ease-in-out infinite;
+        background: #0b1220;
+        animation: cardIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
       }
       @keyframes cardIn {
         from {
@@ -248,12 +239,12 @@ const INTENT_LABEL: Record<string, string> = {
         left: 0;
         right: 0;
         height: 2px;
-        background: linear-gradient(90deg, transparent, #22d3ee, #a78bfa, transparent);
+        background: #6366f1;
         animation: scan 2.4s ease-in-out infinite;
         pointer-events: none;
       }
       .copilot-card .scan {
-        display: block;
+        display: none;
       }
       .card:not(.copilot-card) .scan {
         display: none;
@@ -292,22 +283,12 @@ const INTENT_LABEL: Record<string, string> = {
         overflow: hidden;
       }
       .badge.copilot {
-        background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+        background: #6366f1;
         color: #fff;
-        box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
       }
       .badge.copilot::after {
         content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          110deg,
-          transparent 30%,
-          rgba(255, 255, 255, 0.6) 50%,
-          transparent 70%
-        );
-        transform: translateX(-120%);
-        animation: shimmer 2.6s ease-in-out infinite;
+        display: none;
       }
       @keyframes shimmer {
         0% {
@@ -390,7 +371,7 @@ const INTENT_LABEL: Record<string, string> = {
         display: flex;
         align-items: center;
         gap: 9px;
-        background: linear-gradient(135deg, #1e293b, #182032);
+        background: #1e293b;
         border: 1px solid #2b3a52;
         border-radius: 10px;
         padding: 7px 10px;

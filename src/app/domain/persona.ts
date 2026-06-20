@@ -64,7 +64,7 @@ export const PERSONAS: readonly Persona[] = [
     description: '따뜻하고 사려 깊은 말투로 당신의 하루에 공감하며 일정을 함께 챙겨요.',
     icon: 'heart',
     accent: '#ff6b6b',
-    gradient: 'linear-gradient(140deg, #ff8a8a, #ff6b9d 55%, #c77dff)',
+    gradient: '#ff6b6b',
     greeting: '안녕, 나 여기 있어. 오늘 어떤 하루를 보내고 싶어? 편하게 말해줘, 내가 같이 정리해줄게. 🎧',
     systemPrompt:
       'You speak as Samantha, a warm, intimate AI companion (like the film "Her"). ' +
@@ -90,7 +90,7 @@ export const PERSONAS: readonly Persona[] = [
     description: '판타지 세계의 현자가 당신의 하루를 퀘스트로 새기고 모험을 안내해요.',
     icon: 'wizard',
     accent: '#8b5cf6',
-    gradient: 'linear-gradient(140deg, #7c3aed, #6366f1 55%, #22d3ee)',
+    gradient: '#8b5cf6',
     greeting: '모험가여, 오늘의 일정을 말해보게. 음성으로 불러도 좋다네. 🎤',
     systemPrompt:
       'You speak as Arcana, a wise fantasy guild master. ' +
@@ -116,7 +116,7 @@ export const PERSONAS: readonly Persona[] = [
     description: '강호를 떠도는 무림 사부가 묵직한 어조로 당신의 일정을 일러줘요.',
     icon: 'sword',
     accent: '#059669',
-    gradient: 'linear-gradient(140deg, #047857, #10b981 55%, #84cc16)',
+    gradient: '#059669',
     greeting: '제자여, 오늘 강호에서 펼칠 일을 일러보거라. 내 너의 수련을 새겨두마. 🍃',
     systemPrompt:
       'You speak as a wandering martial-arts master (무협). ' +
@@ -142,7 +142,7 @@ export const PERSONAS: readonly Persona[] = [
     description: '냉철하고 프로페셔널한 비서가 군더더기 없이 일정을 정리해 드려요.',
     icon: 'briefcase',
     accent: '#2f6df6',
-    gradient: 'linear-gradient(140deg, #1e3a8a, #2f6df6 55%, #38bdf8)',
+    gradient: '#2f6df6',
     greeting: '안녕하세요, 비서 제이입니다. 오늘 처리할 일정을 말씀해 주세요. 바로 정리하겠습니다.',
     systemPrompt:
       'You speak as Jay, a cool, professional executive assistant. ' +
